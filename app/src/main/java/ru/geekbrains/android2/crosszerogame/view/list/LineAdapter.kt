@@ -1,48 +1,48 @@
 package ru.geekbrains.android2.crosszerogame.view.list
 
-import android.graphics.Point
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ru.geekbrains.android2.crosszerogame.R
 
-class GameAdapter(
-    private val fieldSize: Int,
+class LineAdapter(
+    length: Int,
+    private val i: Int,
+    private val linear: Linear,
     private val onItemClick: ((Int, Int) -> Unit)
 ) : RecyclerView.Adapter<CellHolder>() {
-    private val cells = mutableListOf<Cell>()
+    private val cells = mutableListOf<CellValue>()
 
     init {
-        CellHolder.cellSize = 0
-        for (y in 0 until fieldSize) {
-            for (x in 0 until fieldSize)
-                cells.add(Cell(Point(x, y)))
+        for (i in 0 until length) {
+            cells.add(CellValue.EMPTY)
         }
     }
 
-    fun setCrossOn(x: Int, y: Int) {
-        val i = y * fieldSize + x
-        cells[i].value = CellValue.CROSS
+    fun setCrossOn(i: Int) {
+        cells[i] = CellValue.CROSS
         notifyItemChanged(i)
     }
 
-    fun setZeroOn(x: Int, y: Int) {
-        val i = y * fieldSize + x
-        cells[i].value = CellValue.ZERO
+    fun setZeroOn(i: Int) {
+        cells[i] = CellValue.ZERO
         notifyItemChanged(i)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         CellHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_field,
+                R.layout.item_cell,
                 parent, false
             ),
             onItemClick
         )
 
     override fun onBindViewHolder(holder: CellHolder, position: Int) =
-        holder.setItem(cells[position])
+        if (linear == Linear.HORIZONTAL)
+            holder.setItem(i, position, cells[position])
+        else
+            holder.setItem(position, i, cells[position])
 
     override fun getItemCount() = cells.size
 }
