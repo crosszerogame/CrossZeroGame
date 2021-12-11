@@ -1,18 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+    <EditText
+        android:id="@+id/edFieldDim"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="3-30"
+        android:inputType="number"
+        android:text="3" />
+
+        <Button
+            android:id="@+id/btnNewGamer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Размер поля" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+        android:id="@+id/edFirstStep"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+            android:layout_weight="1"
+        android:hint="0-defaul,1-gamer,2-opposite"
+        android:inputType="number"
+        android:text="1" />
+
+        <Button
+            android:id="@+id/btnNewGame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="New Game" />
+
+    </LinearLayout>
+
+
     <TextView
+        android:id="@+id/textForWinning"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Фишек для выигрыша:" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <Button
+        android:id="@+id/btnGameIsOn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Game is on" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/textPlayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ход игрока" />
+
+        <EditText
+            android:id="@+id/edPlayerX"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="X"
+            android:inputType="number"
+            android:text="0" />
+
+        <EditText
+            android:id="@+id/edPlayerY"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Y"
+            android:inputType="number"
+            android:text="0" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/textIntelligence"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ход противника" />
+
+        <EditText
+            android:id="@+id/edIntelligenceX"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="X"
+            android:inputType="number"
+            android:text="0" />
+
+        <EditText
+            android:id="@+id/edIntelligenceY"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Y"
+            android:inputType="number"
+            android:text="0" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textResult"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Результат: Идет игра" />
+
+    <EditText
+        android:id="@+id/edGameField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine" />
+
+</LinearLayout>
