@@ -5,4 +5,5 @@
     <string name="second">вторым</string>
     <string name="field_size">Размер поля %d на %d</string>
     <string name="start">Начать</string>
+    <string name="settings">Настройки</string>
 </resources>

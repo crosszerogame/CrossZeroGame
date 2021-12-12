@@ -14,5 +14,6 @@
         <!-- Customize your theme here. -->
         <item name="actionBarStyle">@style/Widget.MaterialComponents.ActionBar.Primary</item>
         <item name="text_color">@color/white</item>
+        <item name="translucent_bg">@color/translucent_black</item>
     </style>
 </resources>

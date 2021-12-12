@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.geekbrains.android2.crosszerogame.R
 
 class FieldAdapter(
-    fieldLength: Int,
+    fieldSize: Int,
     cellSize: Int,
     val linear: Linear,
     onItemClick: ((Int, Int) -> Unit)
@@ -15,8 +15,8 @@ class FieldAdapter(
 
     init {
         CellHolder.cellSize = cellSize
-        for (i in 0 until fieldLength) {
-            lines.add(LineAdapter(fieldLength, i, linear, onItemClick))
+        for (i in 0 until fieldSize) {
+            lines.add(LineAdapter(fieldSize, i, linear, onItemClick))
         }
     }
 
