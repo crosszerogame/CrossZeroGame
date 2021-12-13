@@ -7,32 +7,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.view.list.FieldAdapter
 import ru.geekbrains.android2.crosszerogame.view.list.Linear
+import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
+import ru.geekbrains.android2.crosszerogame.viewmodel.GameState
 
-class GameFragment : Fragment() {
-    companion object {
-        val parameters: MutableLiveData<GameParameters> = MutableLiveData()
-        private const val DEFAULT_SIZE = 3
-        private const val DEFAULT_FIRST = true
-
-        fun launchGame(fieldSize: Int, beginAsFirst: Boolean) {
-            parameters.value = GameParameters(fieldSize, beginAsFirst)
-        }
+class GameFragment : Fragment(), BackEvent {
+    private val model: GameModel by lazy {
+        ViewModelProvider(this).get(GameModel::class.java)
     }
-
-    data class GameParameters(
-        val fieldSize: Int, val beginAsFirst: Boolean
-    )
-
     private lateinit var rvField: RecyclerView
     private lateinit var adapter: FieldAdapter
-    private var size: Int = DEFAULT_SIZE
-    private var isFirst: Boolean = DEFAULT_FIRST
+    private var modelIsInit = false
+    private var messageBar: Snackbar? = null
+    var onMessageAction: (() -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,16 +37,10 @@ class GameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         rvField = view.findViewById(R.id.rv_field) as RecyclerView
-        parameters.observe(requireActivity()) {
-            isFirst = it.beginAsFirst
-            size = it.fieldSize
-            resizeField()
-        }
-        if (savedInstanceState == null || rvField.width == 0)
-            resizeField()
+        initField()
     }
 
-    private fun resizeField() {
+    private fun initField() {
         rvField.visibility = View.INVISIBLE
         rvField.layoutParams = rvField.layoutParams.apply {
             this.width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -68,13 +55,22 @@ class GameFragment : Fragment() {
             }
 
             override fun onFinish() {
-                initField(size)
+                resizeField(model.getFieldSize())
+                restoreField()
+                model.readyField()
+                if (!modelIsInit) {
+                    model.getState().observe(requireActivity()) {
+                        changeGameState(it)
+                    }
+                    model.init()
+                    modelIsInit = true
+                }
                 rvField.visibility = View.VISIBLE
             }
         }.start()
     }
 
-    private fun initField(fieldSize: Int) {
+    private fun resizeField(fieldSize: Int) {
         val linear = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
             Linear.HORIZONTAL
         else
@@ -95,10 +91,7 @@ class GameFragment : Fragment() {
             cellSize = countCellSize(linear, fieldSize),
             linear = linear
         ) { x, y ->
-            if (isFirst)
-                adapter.setCrossOn(x, y)
-            else
-                adapter.setZeroOn(x, y)
+            model.doMove(x, y)
         }
         rvField.adapter = adapter
         adapter.notifyDataSetChanged()
@@ -120,5 +113,70 @@ class GameFragment : Fragment() {
         if (size > max)
             return max
         return size
+    }
+
+    private fun restoreField() {
+        val size = model.getFieldSize()
+        for (x in 0 until size) {
+            for (y in 0 until size) {
+                adapter.setCell(x, y, model.getCell(x, y))
+            }
+        }
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun changeGameState(state: GameState) {
+        dismissMessage()
+        when (state) {
+            is GameState.MoveOpponent -> {
+                if (adapter.linear == Linear.HORIZONTAL)
+                    rvField.smoothScrollToPosition(state.x)
+                else
+                    rvField.smoothScrollToPosition(state.y)
+                doMove(state.x, state.y, state.isCross)
+            }
+            is GameState.MovePlayer -> {
+                doMove(state.x, state.y, state.isCross)
+            }
+            is GameState.NewGame -> {
+                initField()
+            }
+            GameState.WinPlayer -> showMessage(R.string.win_player)
+            GameState.WinOpponent -> showMessage(R.string.win_opponent)
+            GameState.DrawnGame -> showMessage(R.string.drawn)
+            GameState.AbortedGame -> showMessage(R.string.aborted_game)
+            GameState.WaitOpponent -> showMessage(R.string.wait_opponent, false)
+        }
+    }
+
+    private fun showMessage(stringId: Int, withAction: Boolean = true) {
+        messageBar = Snackbar.make(rvField, stringId, Snackbar.LENGTH_INDEFINITE)
+        if (withAction)
+            messageBar?.setAction(android.R.string.ok) {
+                onMessageAction?.invoke()
+                dismissMessage()
+            }
+        messageBar?.show()
+    }
+
+    private fun dismissMessage() {
+        messageBar?.let {
+            it.dismiss()
+            messageBar = null
+        }
+    }
+
+    private fun doMove(x: Int, y: Int, isCross: Boolean) {
+        if (isCross)
+            adapter.setCrossOn(x, y)
+        else
+            adapter.setZeroOn(x, y)
+    }
+
+    override fun onBack(): Boolean {
+        if (messageBar == null)
+            return false
+        dismissMessage()
+        return true
     }
 }

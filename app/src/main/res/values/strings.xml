@@ -3,7 +3,12 @@
     <string name="begin_as">Начинать</string>
     <string name="first">первым</string>
     <string name="second">вторым</string>
-    <string name="field_size">Размер поля %d на %d</string>
+    <string name="field_size">Размер поля %d на %d, для победы: %d</string>
     <string name="start">Начать</string>
     <string name="settings">Настройки</string>
+    <string name="drawn">Ничья</string>
+    <string name="win_player">Вы победили!</string>
+    <string name="win_opponent">Победил противник</string>
+    <string name="aborted_game">Игра прервана</string>
+    <string name="wait_opponent">Ожидание хода противника</string>
 </resources>
