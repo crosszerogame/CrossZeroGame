@@ -21,6 +21,7 @@ class GameModel : ViewModel() {
             parameters.value = GameParameters(fieldSize, beginAsFirst)
         }
     }
+
     private val state: MutableLiveData<GameState> = MutableLiveData()
     private val ai = ArtIntelligence()
     private var gamer = Gamer()
@@ -66,8 +67,6 @@ class GameModel : ViewModel() {
             else
                 GameStatus.NEW_GAME_FIRST_OPPONENT
         )
-        if (!isFirst)
-            doAiMove()
     }
 
     fun doMove(x: Int, y: Int) {
@@ -104,5 +103,10 @@ class GameModel : ViewModel() {
     private fun doAiMove() {
         if (game.motionXIndex > -1)
             state.value = GameState.MoveOpponent(game.motionXIndex, game.motionYIndex, !isFirst)
+    }
+
+    fun readyField() {
+        if (game.gameStatus == GameStatus.GAME_IS_ON && !isFirst)
+            doAiMove()
     }
 }

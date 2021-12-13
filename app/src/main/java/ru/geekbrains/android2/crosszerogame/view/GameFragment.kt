@@ -57,6 +57,7 @@ class GameFragment : Fragment(), BackEvent {
             override fun onFinish() {
                 resizeField(model.getFieldSize())
                 restoreField()
+                model.readyField()
                 if (!modelIsInit) {
                     model.getState().observe(requireActivity()) {
                         changeGameState(it)
