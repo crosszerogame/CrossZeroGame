@@ -45,25 +45,31 @@ class GameFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         rvField = view.findViewById(R.id.rv_field) as RecyclerView
         parameters.observe(requireActivity()) {
-            rvField.layoutParams = rvField.layoutParams.apply {
-                this.width = ViewGroup.LayoutParams.MATCH_PARENT
-                this.height = ViewGroup.LayoutParams.MATCH_PARENT
-            }
             isFirst = it.beginAsFirst
             size = it.fieldSize
             resizeField()
         }
-        if (savedInstanceState == null)
+        if (savedInstanceState == null || rvField.width == 0)
             resizeField()
     }
 
     private fun resizeField() {
-        object : CountDownTimer(100, 100) {
+        rvField.visibility = View.INVISIBLE
+        rvField.layoutParams = rvField.layoutParams.apply {
+            this.width = ViewGroup.LayoutParams.MATCH_PARENT
+            this.height = ViewGroup.LayoutParams.MATCH_PARENT
+        }
+        object : CountDownTimer(500, 50) {
             override fun onTick(millisUntilFinished: Long) {
+                if (rvField.width > 0) {
+                    onFinish()
+                    cancel()
+                }
             }
 
             override fun onFinish() {
                 initField(size)
+                rvField.visibility = View.VISIBLE
             }
         }.start()
     }
