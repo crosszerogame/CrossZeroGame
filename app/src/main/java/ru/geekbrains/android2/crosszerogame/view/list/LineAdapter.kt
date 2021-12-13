@@ -29,6 +29,10 @@ class LineAdapter(
         notifyItemChanged(i)
     }
 
+    fun setCell(i: Int, value: CellValue) {
+        cells[i] = value
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         CellHolder(
             LayoutInflater.from(parent.context).inflate(

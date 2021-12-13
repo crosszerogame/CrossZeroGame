@@ -50,4 +50,11 @@ class FieldAdapter(
         holder.setItem(lines[position])
 
     override fun getItemCount() = lines.size
+
+    fun setCell(x: Int, y: Int, value: CellValue) {
+        if (linear == Linear.HORIZONTAL)
+            lines[x].setCell(y, value)
+        else
+            lines[y].setCell(x, value)
+    }
 }

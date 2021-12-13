@@ -1,19 +1,22 @@
 package ru.geekbrains.android2.crosszerogame.view
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import androidx.fragment.app.Fragment
 import ru.geekbrains.android2.crosszerogame.R
+import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence
 import ru.geekbrains.android2.crosszerogame.databinding.FragmentSettingsBinding
+import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
 
 class SettingsFragment : Fragment() {
     companion object {
         private const val SHIFT_SIZE = 3
     }
     private var binding: FragmentSettingsBinding? = null
+    private val ai = ArtIntelligence()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,7 +32,7 @@ class SettingsFragment : Fragment() {
             btnFirst.isChecked = true
             sbFieldsize.progress = 0
             btnStart.setOnClickListener {
-                GameFragment.launchGame(sbFieldsize.progress + SHIFT_SIZE, btnFirst.isChecked)
+                GameModel.launchGame(sbFieldsize.progress + SHIFT_SIZE, btnFirst.isChecked)
                 requireActivity().onBackPressed()
             }
         }
@@ -39,7 +42,9 @@ class SettingsFragment : Fragment() {
         sbFieldsize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 val size = i + SHIFT_SIZE
-                tvFieldsize.text = String.format(getString(R.string.field_size), size, size)
+                ai.newGamer(size)
+                val game = ai.game()
+                tvFieldsize.text = String.format(getString(R.string.field_size), size, size, game.dotsToWin)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
