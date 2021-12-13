@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">CrossZeroGame</string>
+    <string name="app_name">Крестики-Нолики</string>
+    <string name="begin_as">Начинать</string>
+    <string name="first">первым</string>
+    <string name="second">вторым</string>
+    <string name="field_size">Размер поля %d на %d</string>
+    <string name="start">Начать</string>
+    <string name="settings">Настройки</string>
 </resources>
