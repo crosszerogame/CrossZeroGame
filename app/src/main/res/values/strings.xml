@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">CrossZeroGame</string>
+
+    <string name="back4app_server_url">https://parseapi.back4app.com/</string>
+
+    <!-- Paste BOTH strings as required -->
+    <string name="back4app_app_id">IDx83YYoFGvStpGouDuqZc4g8qF4vKUGuuNkGPcC</string>
+
+    // IDx83YYoFGvStpGouDuqZc4g8qF4vKUGuuNkGPcC
+
+    <string name="back4app_client_key">IrxbE17QQH3RoLGlbdgRfbWewcfTGMxSO26x7c5F</string>
+
+    // IrxbE17QQH3RoLGlbdgRfbWewcfTGMxSO26x7c5F
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

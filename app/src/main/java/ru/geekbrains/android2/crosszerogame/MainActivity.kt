@@ -8,6 +8,7 @@ import ru.geekbrains.android2.crosszerogame.data.Game
 import ru.geekbrains.android2.crosszerogame.data.GameStatus
 import ru.geekbrains.android2.crosszerogame.data.Gamer
 import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence
+import ru.geekbrains.android2.crosszerogame.model.ServerConnection
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,6 +19,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        ServerConnection().insertToServer("T","C", "D")
 
         btnNewGamer.setOnClickListener {
             gamer = ai.newGamer(edFieldDim.text.toString().toInt())
