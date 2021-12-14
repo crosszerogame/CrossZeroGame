@@ -1,32 +1,33 @@
 package ru.geekbrains.android2.crosszerogame.data
 
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN1
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN1_SIZE1
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN1_SIZE2
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN2
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN2_SIZE1
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN2_SIZE2
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN3
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN3_SIZE1
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN3_SIZE2
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.MAX_FIELD_SIZE
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.MIN_FIELD_SIZE
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN1
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN1_SIZE1
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN1_SIZE2
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN2
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN2_SIZE1
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN2_SIZE2
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN3
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN3_SIZE1
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN3_SIZE2
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.MIN_FIELD_SIZE
 
 data class Game(
+    val keyGame: Int = 0,
     val gameFieldSize: Int = MIN_FIELD_SIZE,
     var gameField: Array<Array<CellField>> = Array(gameFieldSize) { Array(gameFieldSize) { CellField.EMPTY } },
     var motionXIndex: Int = -1,
     var motionYIndex: Int = -1,
     var gameStatus: GameStatus = GameStatus.NEW_GAME,
     var dotsToWin: Int = DOTS_TO_WIN1_SIZE1,
-    var turnOfGamer: Boolean = true
+    var turnOfGamer: Boolean = true,
+    var timeForTurn:Int = GameRepository.MIN_TIME_FOR_TURN
 ) {
     init {
-        if (motionXIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
-            && motionYIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
-        )
-            gameField[motionYIndex][motionXIndex] =
-                if (turnOfGamer) CellField.GAMER else CellField.OPPONENT
+//        if (motionXIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
+//            && motionYIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
+//        )
+//            gameField[motionYIndex][motionXIndex] =
+//                if (turnOfGamer) CellField.GAMER else CellField.OPPONENT
 
         dotsToWin = when (gameFieldSize) {
             in DOTS_TO_WIN1_SIZE1..DOTS_TO_WIN1_SIZE2 -> DOTS_TO_WIN1

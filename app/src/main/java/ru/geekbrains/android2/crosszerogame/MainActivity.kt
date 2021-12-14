@@ -7,11 +7,11 @@ import ru.geekbrains.android2.crosszerogame.data.CellField
 import ru.geekbrains.android2.crosszerogame.data.Game
 import ru.geekbrains.android2.crosszerogame.data.GameStatus
 import ru.geekbrains.android2.crosszerogame.data.Gamer
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence
+import ru.geekbrains.android2.crosszerogame.data.GameRepository
 
 class MainActivity : AppCompatActivity() {
 
-    private val ai = ArtIntelligence()
+    private val ai = GameRepository(true)
     private var gamer = Gamer()
     private var game = Game()
 
@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         btnNewGamer.setOnClickListener {
-            gamer = ai.newGamer(edFieldDim.text.toString().toInt())
+            gamer = ai.gamer(gameFieldSize=edFieldDim.text.toString().toInt())
             edFieldDim.setText(gamer.gameFieldSize.toString())
 
         }
