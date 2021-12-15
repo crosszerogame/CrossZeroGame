@@ -20,16 +20,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-        //   ServerConnection().insertVariableOnServer("var", "10")
-
-      //  ServerConnection().insertVariableOnServer("score", "24")
-
-
-        ServerConnection().liveDataVariableValue.observe(this, {
-            println("vari = ${it.variableName} ${it.variableValue}")
-        })
-
         btnNewGamer.setOnClickListener {
             gamer = ai.newGamer(edFieldDim.text.toString().toInt())
             edFieldDim.setText(gamer.gameFieldSize.toString())
@@ -57,12 +47,6 @@ class MainActivity : AppCompatActivity() {
             setGameTexts()
         }
 
-    }
-
-    override fun onResume() {
-        super.onResume()
-        println("onResume")
-        ServerConnection().getVariableFromServer("score")
     }
 
     private fun setGameTexts() {
