@@ -3,45 +3,45 @@ package ru.geekbrains.android2.crosszerogame.model
 interface ServerOperations {
 
     /**
-     * Сохраняет объект на сервере, для этого необходимо указать название таблицы (tableName),
-     * куда необходимо сохранить данные, название колонки (columnName), сами данные (dataToInsert).
-     * Пока данные можно сохранять только в формате Строки String, попозже постараюсь и для других типов
-     * данных созать возможность сохранения.
-     * В А Ж Н О:
-     * Обратите внимание, данная функция возвращает данные в формате строки, это id сохранённого объекта,
-     * его вам нужно запомнить, чтобы потом можно было рабоать с этим объектом
+     * Сохраняет переменную на сервере, variableName - имя переменной, variableValue - значение
+     * Если вставить переменную, значение variableName которой уже хранится на сервере, то
+     * переменная перезапишется на сервере.
      */
-    fun insertToServer(tableName: String, columnName: String, dataToInsert: String): String
+    fun insertVariableOnServer(variableName: String, variableValue: String)
 
     /**
-     * Функция получает всю таблицу по названию с сервера и передаёт её LiveData
+     * Функция получения значения переменной с сервера.
+     */
+    fun getVariableFromServer(variableName: String)
+
+    /**
+     * Функция удаления переменной на сервере
+     */
+    fun deleteVariableFromServer(variableName: String)
+
+    /**
+     * Функция сохранения таблицы на сервере, где tableName - имя таблицы,
+     * а list - список, содержащий в себе data class ListData, в котором
+     * находятся 2 переменные: название колонки (columnName) и значение, которое
+     * нужно записать в ячейку (data). Если вызвать функцию сохранения данных в одну и ту же
+     * таблицу второй раз, то данные БУДУТ ДОБАВЛЕНЫ, А НЕ ОБНОВЛЕНЫ, для обновления есть
+     * функция updateTableOnServer(tableName: String, list: List<ListData>)
+     */
+    fun insertTableToServer(tableName: String, list: List<ListData>)
+
+    /**
+     * Обновляет данные в таблице.
+     */
+    fun updateTableOnServer(tableName: String, list: List<ListData>)
+
+    /**
+     * Удаляет таблицу на сервере
+     */
+    fun deleteTableFromServer(tableName: String)
+
+    /**
+     * Функция получения таблицы с сервера
      */
     fun getTableFromServer(tableName: String)
-
-
-    /**
-     * Функция обновляет данные в таблицы на сервере.
-     */
-    fun updateOnServer(
-        tableName: String,
-        objectId: String,
-        columnName: String,
-        dataToInsert: String
-    )
-
-    /**
-     * Функция удаляет всю таблицу на сервере.
-     */
-    fun deleteFromServer(tableName: String)
-
-    /**
-     * Функция удаляет объект в таблице на сервере
-     */
-    fun deleteObjectFromServer(tableName: String, objectId: String)
-
-    /**
-     * Функция получает объект с сервера из таблицы по уникальному id объекта
-     */
-    fun getObjectFromTableInServer(tableName: String, objectId: String)
 
 }
