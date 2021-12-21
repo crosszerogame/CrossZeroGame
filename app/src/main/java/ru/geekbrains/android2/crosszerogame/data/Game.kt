@@ -19,7 +19,7 @@ data class Game(
     var motionYIndex: Int = -1,
     var gameStatus: GameStatus = GameStatus.NEW_GAME,
     var dotsToWin: Int = DOTS_TO_WIN1_SIZE1,
-    var turnOfGamer: Boolean = true
+    var turnOfGamer: Boolean = true,
 ) {
     init {
         if (motionXIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE

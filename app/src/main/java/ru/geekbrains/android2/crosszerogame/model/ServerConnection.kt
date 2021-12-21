@@ -2,7 +2,13 @@ package ru.geekbrains.android2.crosszerogame.model
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.parse.*
+import com.parse.ParseException
+import com.parse.ParseObject
+import com.parse.ParseQuery
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.core.SingleOnSubscribe
 
 data class VariableData(val variableName: String, val variableValue: String)
 
@@ -40,6 +46,7 @@ class ServerConnection : ServerOperations {
             if (e == null) {
                 println(objects)
                 println("getVariableFromServer " + objects[0].get(columnName))
+                // https://github.undefined.moe/androiddevnotesyoutube/callback-example-kotlin/tree/main/app
                 // TODO как теперь отсюда данные передать в другой класс лучше???
                 liveDataVariableValue.postValue(
                     VariableData(
@@ -52,6 +59,67 @@ class ServerConnection : ServerOperations {
             }
         }
     }
+
+    fun getVariableFromServerRx(variableName: String): Single<VariableData> {
+
+        var obj: Single<VariableData> = Single.create(SingleOnSubscribe {
+
+        })
+
+        val varName = "var$variableName"
+        val query = ParseQuery.getQuery<ParseObject>(varName)
+        query.orderByDescending("createdAt")
+
+
+        query.findInBackground { objects, e ->
+            if (e == null) {
+                println(objects)
+                println("getVariableFromServer " + objects[0].get(columnName))
+                // TODO как теперь отсюда данные передать в другой класс лучше???
+
+                obj = Single.create(SingleOnSubscribe {
+
+                })
+
+                liveDataVariableValue.postValue(
+                    VariableData(
+                        variableName,
+                        objects[0].get(columnName) as String
+                    )
+                )
+            } else {
+                Log.d("Error", e.message!!)
+            }
+        }
+        return obj
+    }
+
+
+//    fun getRx(variableName: String): Single<VariableData> {
+//
+//        var obj: Single<VariableData> = Single.create(SingleOnSubscribe {
+//
+//        })
+//
+//        val varName = "var$variableName"
+//        val query = ParseQuery.getQuery<ParseObject>(varName)
+//        query.orderByDescending("createdAt")
+//        query.findInBackground { objects, e ->
+//            if (e == null) {
+//                return Single.just(objects)
+//                liveDataVariableValue.postValue(
+//                    VariableData(
+//                        variableName,
+//                        objects[0].get(columnName) as String
+//                    )
+//                )
+//            } else {
+//                Log.d("Error", e.message!!)
+//            }
+//        }
+//        return obj
+//    }
+
 
     override fun deleteVariableFromServer(variableName: String) {
         val varName = "var$variableName"
