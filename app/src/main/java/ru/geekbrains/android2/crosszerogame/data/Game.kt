@@ -9,25 +9,30 @@ import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_T
 import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN3
 import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN3_SIZE1
 import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN3_SIZE2
+import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.MAX_FIELD_SIZE
 import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.MIN_FIELD_SIZE
 
 data class Game(
-    val keyGame: Int = 0,
-    val gameFieldSize: Int = MIN_FIELD_SIZE,
+    var keyGame: String = "",
+    var gameFieldSize: Int = MIN_FIELD_SIZE,
     var gameField: Array<Array<CellField>> = Array(gameFieldSize) { Array(gameFieldSize) { CellField.EMPTY } },
     var motionXIndex: Int = -1,
     var motionYIndex: Int = -1,
     var gameStatus: GameStatus = GameStatus.NEW_GAME,
     var dotsToWin: Int = DOTS_TO_WIN1_SIZE1,
     var turnOfGamer: Boolean = true,
-    var timeForTurn:Int = GameRepository.MIN_TIME_FOR_TURN
+    var timeForTurn: Int = GameRepository.MIN_TIME_FOR_TURN
+
 ) {
     init {
-//        if (motionXIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
+ //       if (motionXIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
 //            && motionYIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
 //        )
 //            gameField[motionYIndex][motionXIndex] =
 //                if (turnOfGamer) CellField.GAMER else CellField.OPPONENT
+
+        if (gameFieldSize !in MIN_FIELD_SIZE..MAX_FIELD_SIZE)
+            gameFieldSize = MIN_FIELD_SIZE
 
         dotsToWin = when (gameFieldSize) {
             in DOTS_TO_WIN1_SIZE1..DOTS_TO_WIN1_SIZE2 -> DOTS_TO_WIN1
@@ -38,10 +43,18 @@ data class Game(
 
     }
 
-    fun convertGamerToOpponent() {
+    fun revertGamerToOpponent() {
         for (arrCell in gameField) {
             for (cell in arrCell) if (cell == CellField.GAMER) CellField.OPPONENT
             else if (cell == CellField.OPPONENT) CellField.GAMER
+        }
+        turnOfGamer = !turnOfGamer
+        gameStatus = when (gameStatus) {
+            GameStatus.WIN_GAMER -> GameStatus.WIN_OPPONENT
+            GameStatus.WIN_OPPONENT -> GameStatus.WIN_GAMER
+            GameStatus.NEW_GAME_FIRST_GAMER -> GameStatus.NEW_GAME_FIRST_OPPONENT
+            GameStatus.NEW_GAME_FIRST_OPPONENT -> GameStatus.NEW_GAME_FIRST_GAMER
+            else -> gameStatus
         }
     }
 
@@ -77,6 +90,7 @@ enum class GameStatus {
     ABORTED_GAME,
     NEW_GAME,
     NEW_GAME_FIRST_GAMER,
-    NEW_GAME_FIRST_OPPONENT
+    NEW_GAME_FIRST_OPPONENT,
+    NEW_GAME_ACCEPT
 
 }
