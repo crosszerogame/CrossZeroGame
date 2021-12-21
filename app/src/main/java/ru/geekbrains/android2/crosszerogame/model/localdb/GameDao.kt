@@ -12,18 +12,18 @@ import io.reactivex.rxjava3.core.Single
 interface GameDao {
 
     @Insert
-    fun insertGamer(gameEntity: GameEntity)
+    fun insertGame(gameEntity: GameEntity)
 
     @Delete
-    fun deleteGamer(gameEntity: GameEntity)
+    fun deleteGame(gameEntity: GameEntity)
 
     @Query("SELECT * FROM games_table")
-    fun getAllGamers(): Single<List<GameEntity>>
+    fun getAllGames(): Single<List<GameEntity>>
 
     @Query("DELETE FROM games_table")
-    fun deleteAllGamers(): Completable
+    fun deleteAllGames(): Completable
 
     @Query("SELECT * FROM games_table WHERE keyGame=:keyGame")
-    fun getGameByKeyGame(keyGame: String): Maybe<GameEntity>
+    fun getGameByKeyGame(keyGame: String): Single<GameEntity>
 }
 

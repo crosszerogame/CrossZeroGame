@@ -1,4 +1,8 @@
-package ru.geekbrains.android2.crosszerogame.model
+package ru.geekbrains.android2.crosszerogame.model.repository
+
+import com.parse.ParseObject
+import com.parse.ParseQuery
+import ru.geekbrains.android2.crosszerogame.model.repository.ListData
 
 interface ServerOperations {
 
@@ -12,7 +16,7 @@ interface ServerOperations {
     /**
      * Функция получения значения переменной с сервера.
      */
-    fun getVariableFromServer(variableName: String)
+    fun getVariableFromServer(variableName: String): ParseQuery<ParseObject>?
 
     /**
      * Функция удаления переменной на сервере
@@ -42,6 +46,6 @@ interface ServerOperations {
     /**
      * Функция получения таблицы с сервера
      */
-    fun getTableFromServer(tableName: String)
+    fun getTableFromServer(tableName: String): ParseQuery<ParseObject>?
 
 }

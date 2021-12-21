@@ -24,7 +24,7 @@ interface GamerDao {
     fun deleteAllGamers(): Completable
 
     @Query("SELECT * FROM gamers_table WHERE keyGamer=:keyGamer")
-    fun getGamerByKeyGamer(keyGamer: String): Maybe<GamerEntity>
+    fun getGamerByKeyGamer(keyGamer: String): Single<GamerEntity>
 
 }
 
