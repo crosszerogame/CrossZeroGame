@@ -12,7 +12,7 @@ fun convertToGamerEntity(gamer: Gamer) =
         gamer.gameFieldSize,
         gamer.levelGamer,
         gamer.chipImageId,
-        "gamer.timeForTurn".toInt(),
+        2,
         "gamer.keyOpponent",
         "gamer.keyGame",
         true

@@ -16,7 +16,7 @@ interface ServerOperations {
     /**
      * Функция получения значения переменной с сервера.
      */
-    fun getVariableFromServer(variableName: String): ParseQuery<ParseObject>?
+    fun getVariablesFromServer(): ParseQuery<ParseObject>?
 
     /**
      * Функция удаления переменной на сервере

@@ -149,15 +149,15 @@ class Repo(
 
     override fun insertVariableOnServer(variableName: String, variableValue: String) {
         val varName = "var$variableName"
-        val query = ParseQuery.getQuery<ParseObject>(varName)
+        val query = ParseQuery.getQuery<ParseObject>(variablesClass)
         query.orderByDescending("createdAt")
         query.findInBackground { objects, e ->
             if (e == null) {
-                try {
-                    updateObject(varName, objects[0].objectId, columnName, variableValue)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    createObject(varName, columnName, variableValue)
+                val id = getVariableId(objects, varName)
+                if (id != "id") {
+                    updateObject(variablesClass, id, varName, variableValue)
+                } else {
+                    createObject(variablesClass, varName, variableValue)
                 }
             } else {
                 Log.d("Error", e.message!!)
@@ -165,32 +165,32 @@ class Repo(
         }
     }
 
-    override fun getVariableFromServer(variableName: String): ParseQuery<ParseObject>? {
-        val varName = "var$variableName"
-        val query = ParseQuery.getQuery<ParseObject>(varName)
-        return query
+    override fun getVariablesFromServer(): ParseQuery<ParseObject>? =
+        ParseQuery.getQuery<ParseObject>(variablesClass)
 
-        /*
-        query.orderByDescending("createdAt")
-        query.findInBackground { objects, e ->
-            if (e == null) {
+    /*
+    query.orderByDescending("createdAt")
+    query.findInBackground { objects, e ->
+        if (e == null) {
 
-            } else {
-                Log.d("Error", e.message!!)
-            }
+        } else {
+            Log.d("Error", e.message!!)
         }
-        */
-
     }
+    */
 
     override fun deleteVariableFromServer(variableName: String) {
         val varName = "var$variableName"
-        val firstObject = ParseObject(varName)
-        firstObject.deleteInBackground {
-            if (it == null) {
-                Log.d("Status", "Deleted")
+        val query = ParseQuery.getQuery<ParseObject>(varName)
+        query.orderByDescending("createdAt")
+        query.findInBackground { objects, e ->
+            if (e == null) {
+                val id = getVariableId(objects, varName)
+                if (id != "id") {
+                    deleteObject(variablesClass, id)
+                }
             } else {
-                Log.d("Error", it.message!!)
+                Log.d("Error", e.message!!)
             }
         }
     }
@@ -225,23 +225,41 @@ class Repo(
         }
     }
 
-    override fun getTableFromServer(tableName: String): ParseQuery<ParseObject>? {
-        val query = ParseQuery.getQuery<ParseObject>(tableName)
-        return query
+    override fun getTableFromServer(tableName: String): ParseQuery<ParseObject>? =
+        ParseQuery.getQuery<ParseObject>(tableName)
 
-        /*
-        query.orderByDescending("createdAt")
-        query.findInBackground { objects, e ->
-            if (e == null) {
-                // TODO как теперь отсюда данные передать в другой класс лучше???
-            } else {
-                Log.d("Error", e.message!!)
-            }
+    /*
+    query.orderByDescending("createdAt")
+    query.findInBackground { objects, e ->
+        if (e == null) {
+            // TODO как теперь отсюда данные передать в другой класс лучше???
+        } else {
+            Log.d("Error", e.message!!)
         }
-        */
-        
+    }
+    */
+
+    fun insertGamerToServer(gamer: Gamer) {
+        val _gamer = convertToGamerEntity(gamer)
+
+        insert(_gamer, "keyGamer", _gamer.keyGamer, ServerClasses.gamerClass)
+        insert(_gamer, "nikGamer", _gamer.nikGamer, ServerClasses.gamerClass)
+
+        insert(_gamer, "gameFieldSize", _gamer.gameFieldSize.toString(), ServerClasses.gamerClass)
+        insert(_gamer, "levelGamer", _gamer.levelGamer.toString(), ServerClasses.gamerClass)
+
+        insert(_gamer, "chipImageId", _gamer.chipImageId.toString(), ServerClasses.gamerClass)
+        insert(_gamer, "timeForTurn", _gamer.timeForTurn.toString(), ServerClasses.gamerClass)
+
+
+        insert(_gamer, "keyOpponent", _gamer.keyOpponent, ServerClasses.gamerClass)
+        insert(_gamer, "keyGame", _gamer.keyGame, ServerClasses.gamerClass)
+
+        insert(_gamer, "isOnLine", _gamer.isOnLine.toString(), ServerClasses.gamerClass)
+
     }
 
+    
 }
 
 

@@ -1,5 +1,6 @@
 package ru.geekbrains.android2.crosszerogame.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -9,7 +10,11 @@ import ru.geekbrains.android2.crosszerogame.data.Game
 import ru.geekbrains.android2.crosszerogame.data.GameStatus
 import ru.geekbrains.android2.crosszerogame.data.Gamer
 import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence
+import ru.geekbrains.android2.crosszerogame.model.repository.Repo
 import ru.geekbrains.android2.crosszerogame.view.list.CellValue
+import javax.inject.Inject
+import io.reactivex.rxjava3.schedulers.Schedulers
+import ru.geekbrains.android2.crosszerogame.model.repository.ListData
 
 class GameModel : ViewModel() {
     companion object {
@@ -34,6 +39,76 @@ class GameModel : ViewModel() {
         isFirst = it.beginAsFirst
         newGame()
     }
+
+
+    @Inject
+    lateinit var provideRepo: Repo
+
+    fun testRepo() {
+        //  provideRepo.insertGamer(Gamer())
+
+//        provideRepo.getListOfGamers().observeOn(Schedulers.io())
+//            .subscribeOn(Schedulers.io())
+//            .subscribe({
+//                       println("found words : $it")
+//            },
+//                {
+//                    it.printStackTrace()
+//                })
+
+//        provideRepo.getGamer("gamer").observeOn(Schedulers.io())
+//            .subscribeOn(Schedulers.io())
+//            .subscribe({
+//                println("found gamer : $it")
+//            },{
+//                it.printStackTrace()
+//            })
+
+        val list = listOf(
+            ListData("c1", "d1"),
+            ListData("c2", "d2"),
+            ListData("c3", "d3"),
+            ListData("c4", "d4")
+        )
+
+//        provideRepo.insertVariableOnServer("Test", "changed")
+//        provideRepo.insertVariableOnServer("toDelete", "changed")
+
+//        provideRepo.deleteVariableFromServer("toDelete")
+//
+//        provideRepo.deleteTableFromServer("toDelete")
+
+        provideRepo.insertVariableOnServer("testName", "testName1 changed")
+
+        provideRepo.insertVariableOnServer("testName2", "testName2 changed")
+
+//        provideRepo.getVariablesFromServer()
+//            ?.findInBackground { objects, e ->
+//                val variableName = "vartestName"
+//                val varName = "var$variableName"
+//                if (e == null) {
+//                    for (i in 0 until objects.size) {
+//                        if (objects[i].get(varName) != null) {
+//                            println( "varValue = ${objects[i].get(varName)}"  )
+//                        } else {
+//                            Log.d("Status", "Not found")
+//                        }
+//                    }
+//                } else {
+//                    Log.d("Error", e.message!!)
+//                }
+//            }
+//
+
+
+    //   provideRepo.deleteVariableFromServer("testName2")
+
+
+
+
+
+    }
+
 
     fun getState(): LiveData<GameState> = state
 
