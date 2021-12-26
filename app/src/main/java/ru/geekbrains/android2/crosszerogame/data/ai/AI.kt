@@ -2,9 +2,9 @@ package ru.geekbrains.android2.crosszerogame.data.ai
 
 import ru.geekbrains.android2.crosszerogame.data.*
 
-class AI(val remoteOpponentGame:Boolean=false) {
-    private var SIZE = GameRepository.MIN_FIELD_SIZE
-    private var DOTS_TO_WIN = GameRepository.DOTS_TO_WIN1
+class AI(val remoteOpponentGame: Boolean = false) {
+    private var SIZE = GameConstants.MIN_FIELD_SIZE
+    private var DOTS_TO_WIN = GameConstants.DOTS_TO_WIN1
     private var lastXDOT_X = 0
     private var lastYDOT_X = 0
     private var lastXDOT_O = 0
@@ -14,30 +14,30 @@ class AI(val remoteOpponentGame:Boolean=false) {
 
     private var map = Array(SIZE) { Array(SIZE) { DOT_EMPTY } }
 
-     fun initGame(currentGamer: Gamer):Int {
+
+    fun initGame(gameFieldSize: Int): Pair<Int, Int> {
         SIZE =
-            if (currentGamer.gameFieldSize > GameRepository.MAX_FIELD_SIZE || currentGamer.gameFieldSize < GameRepository.MIN_FIELD_SIZE) GameRepository.MIN_FIELD_SIZE
-            else currentGamer.gameFieldSize
-        currentGamer.gameFieldSize = SIZE
+            if (gameFieldSize > GameConstants.MAX_FIELD_SIZE || gameFieldSize < GameConstants.MIN_FIELD_SIZE) GameConstants.MIN_FIELD_SIZE
+            else gameFieldSize
 
         when (SIZE) {
-            in GameRepository.DOTS_TO_WIN1_SIZE1..GameRepository.DOTS_TO_WIN1_SIZE2 -> DOTS_TO_WIN =
-                GameRepository.DOTS_TO_WIN1
-            in GameRepository.DOTS_TO_WIN2_SIZE1..GameRepository.DOTS_TO_WIN2_SIZE2 -> DOTS_TO_WIN =
-                GameRepository.DOTS_TO_WIN2
-            in GameRepository.DOTS_TO_WIN3_SIZE1..GameRepository.DOTS_TO_WIN3_SIZE2 -> DOTS_TO_WIN =
-                GameRepository.DOTS_TO_WIN3
+            in GameConstants.DOTS_TO_WIN1_SIZE1..GameConstants.DOTS_TO_WIN1_SIZE2 -> DOTS_TO_WIN =
+                GameConstants.DOTS_TO_WIN1
+            in GameConstants.DOTS_TO_WIN2_SIZE1..GameConstants.DOTS_TO_WIN2_SIZE2 -> DOTS_TO_WIN =
+                GameConstants.DOTS_TO_WIN2
+            in GameConstants.DOTS_TO_WIN3_SIZE1..GameConstants.DOTS_TO_WIN3_SIZE2 -> DOTS_TO_WIN =
+                GameConstants.DOTS_TO_WIN3
         }
 
         map = Array(SIZE) { Array(SIZE) { DOT_EMPTY } }
 
-       return DOTS_TO_WIN
+        return Pair(SIZE, DOTS_TO_WIN)
     }
 
-     fun humanTurn(motionXIndex: Int, motionYIndex: Int, turnOfGamer:Boolean): Boolean {
+    fun humanTurn(motionXIndex: Int, motionYIndex: Int, turnOfGamer: Boolean): Boolean {
         if (!isCellValid(motionXIndex, motionYIndex)) return false
-        if(turnOfGamer) map[motionYIndex][motionXIndex] = DOT_X
-         else map[motionYIndex][motionXIndex] = DOT_O
+        if (turnOfGamer) map[motionYIndex][motionXIndex] = DOT_X
+        else map[motionYIndex][motionXIndex] = DOT_O
         lastXDOT_X = motionXIndex
         lastYDOT_X = motionYIndex
         return true
@@ -49,8 +49,8 @@ class AI(val remoteOpponentGame:Boolean=false) {
         return false
     }
 
-    fun checkWin(x: Int, y: Int, turnOfGamer:Boolean): Boolean {
-        return calcStep(if(turnOfGamer)  DOT_X else  DOT_O, x, y) >= DOTS_TO_WIN
+    fun checkWin(x: Int, y: Int, turnOfGamer: Boolean): Boolean {
+        return calcStep(if (turnOfGamer) DOT_X else DOT_O, x, y) >= DOTS_TO_WIN
     }
 
     //для элемента массива с индексами x, y, для символа symb рассчитывается максимальное количество шагов до победы DOTS_TO_WIN - step ,
@@ -195,7 +195,7 @@ class AI(val remoteOpponentGame:Boolean=false) {
 // при равных значениях stepOmax выбирает элемент с максимальным количеством проставленных фищек, входящих в победные комбинации - freedomWithFrOmax,
 // при равных значениях freedomWithFrOmax выбирает элемент с максимальным количествоv победных комбинаций - freedomOmax
 // для хода, если  stepOmax >= stepXmax, выбирается лучший элемент для себя, иначе выбирается лучший элемент для противника
-    fun aiTurn():Pair<Int, Int> {
+    fun aiTurn(): Pair<Int, Int> {
         val x: Int
         val y: Int
         var stepX: Int
@@ -265,7 +265,7 @@ class AI(val remoteOpponentGame:Boolean=false) {
         map[y][x] = DOT_O
         lastXDOT_O = x
         lastYDOT_O = y
-        return Pair(x,y)
+        return Pair(x, y)
     }
 
     fun isMapFull(): Boolean {

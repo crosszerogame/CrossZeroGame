@@ -25,7 +25,7 @@ class CrossZeroDBFake:CrossZeroDB {
 
     override fun getGamer(key: String): Gamer {
         val g =listGamers[key.toInt()]
-        return g
+        return g.copy()
     }
 
     override fun listGamer(): List<Gamer> {
@@ -34,12 +34,14 @@ class CrossZeroDBFake:CrossZeroDB {
 
     override fun insGame(game: Game): String {
         val g = game.copy()
+            g.gameField = game.gameField.copyOf()
         listGames.add(g)
         return (listGames.size-1).toString()
     }
 
     override fun updGame(key: String, game: Game): Boolean {
         val g = game.copy()
+        g.gameField = game.gameField.copyOf()
         listGames[key.toInt()]=g
         return true
     }
@@ -50,7 +52,7 @@ class CrossZeroDBFake:CrossZeroDB {
 
     override fun getGame(key: String): Game {
         val g =listGames[key.toInt()]
-        return g
+        return g.copy()
     }
 
     override fun listGame(): List<Game> {

@@ -1,7 +1,6 @@
 package ru.geekbrains.android2.crosszerogame.data.remote
 
 import ru.geekbrains.android2.crosszerogame.data.Game
-import ru.geekbrains.android2.crosszerogame.data.GameRepository
 import ru.geekbrains.android2.crosszerogame.data.Gamer
 
 class RemoteGame(private val db: CrossZeroDB) {
@@ -103,9 +102,9 @@ class RemoteGame(private val db: CrossZeroDB) {
         val g = db.getGamer(gamer.keyGamer)
         if (g != null) {
             if (g.keyGame != "") {
-                return db.getGame(g.keyGame).also {
-                    it?.revertGamerToOpponent()
-                }
+                val gm = db.getGame(g.keyGame)?.copy()
+                gm?.revertGamerToOpponent()
+                return gm
             } else return null
         } else return null
     }

@@ -1,27 +1,29 @@
 package ru.geekbrains.android2.crosszerogame.data
 
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN1
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN1_SIZE1
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN1_SIZE2
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN2
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN2_SIZE1
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN2_SIZE2
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN3
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN3_SIZE1
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.DOTS_TO_WIN3_SIZE2
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.MAX_FIELD_SIZE
-import ru.geekbrains.android2.crosszerogame.data.GameRepository.Companion.MIN_FIELD_SIZE
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN1
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN1_SIZE1
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN1_SIZE2
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN2
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN2_SIZE1
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN2_SIZE2
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN3
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN3_SIZE1
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN3_SIZE2
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.MAX_FIELD_SIZE
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.MIN_FIELD_SIZE
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.MIN_TIME_FOR_TURN
 
 data class Game(
     var keyGame: String = "",
     var gameFieldSize: Int = MIN_FIELD_SIZE,
-    var gameField: Array<Array<CellField>> = Array(gameFieldSize) { Array(gameFieldSize) { CellField.EMPTY } },
+    var gameField: Array<Array<GameConstants.CellField>> = Array(gameFieldSize) { Array(gameFieldSize) { GameConstants.CellField.EMPTY } },
     var motionXIndex: Int = -1,
     var motionYIndex: Int = -1,
-    var gameStatus: GameStatus = GameStatus.NEW_GAME,
+    var gameStatus: GameConstants.GameStatus = GameConstants.GameStatus.NEW_GAME,
     var dotsToWin: Int = DOTS_TO_WIN1_SIZE1,
     var turnOfGamer: Boolean = true,
-    var timeForTurn: Int = GameRepository.MIN_TIME_FOR_TURN
+    var timeForTurn: Int = MIN_TIME_FOR_TURN,
+    var countOfTurn:Int=0
 
 ) {
     init {
@@ -44,20 +46,27 @@ data class Game(
     }
 
     fun revertGamerToOpponent() {
-        for (arrCell in gameField) {
-            for (cell in arrCell) if (cell == CellField.GAMER) CellField.OPPONENT
-            else if (cell == CellField.OPPONENT) CellField.GAMER
-        }
+//        for ((j, arrCell) in gameField.withIndex()) {
+//            for ((i,cell) in arrCell.withIndex()) if (cell == CellField.GAMER) gameField[j][i]= CellField.OPPONENT
+//            else if (cell == CellField.OPPONENT) gameField[j][i]=CellField.GAMER
+//        }
         turnOfGamer = !turnOfGamer
         gameStatus = when (gameStatus) {
-            GameStatus.WIN_GAMER -> GameStatus.WIN_OPPONENT
-            GameStatus.WIN_OPPONENT -> GameStatus.WIN_GAMER
-            GameStatus.NEW_GAME_FIRST_GAMER -> GameStatus.NEW_GAME_FIRST_OPPONENT
-            GameStatus.NEW_GAME_FIRST_OPPONENT -> GameStatus.NEW_GAME_FIRST_GAMER
+            GameConstants.GameStatus.WIN_GAMER -> GameConstants.GameStatus.WIN_OPPONENT
+            GameConstants.GameStatus.WIN_OPPONENT -> GameConstants.GameStatus.WIN_GAMER
+            GameConstants.GameStatus.NEW_GAME_FIRST_GAMER -> GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT
+            GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT -> GameConstants.GameStatus.NEW_GAME_FIRST_GAMER
             else -> gameStatus
         }
     }
 
+    fun revertField() {
+        for ((j, arrCell) in gameField.withIndex()) {
+            for ((i, cell) in arrCell.withIndex()) if (cell == GameConstants.CellField.GAMER) gameField[j][i] =
+                GameConstants.CellField.OPPONENT
+            else if (cell == GameConstants.CellField.OPPONENT) gameField[j][i] = GameConstants.CellField.GAMER
+        }
+    }
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -78,19 +87,19 @@ data class Game(
 }
 
 
-enum class CellField {
-    GAMER, OPPONENT, EMPTY
-}
+//enum class CellField {
+//    GAMER, OPPONENT, EMPTY
+//}
 
-enum class GameStatus {
-    GAME_IS_ON,
-    WIN_GAMER,
-    WIN_OPPONENT,
-    DRAWN_GAME,
-    ABORTED_GAME,
-    NEW_GAME,
-    NEW_GAME_FIRST_GAMER,
-    NEW_GAME_FIRST_OPPONENT,
-    NEW_GAME_ACCEPT
-
-}
+//enum class GameStatus {
+//    GAME_IS_ON,
+//    WIN_GAMER,
+//    WIN_OPPONENT,
+//    DRAWN_GAME,
+//    ABORTED_GAME,
+//    NEW_GAME,
+//    NEW_GAME_FIRST_GAMER,
+//    NEW_GAME_FIRST_OPPONENT,
+//    NEW_GAME_ACCEPT
+//
+//}

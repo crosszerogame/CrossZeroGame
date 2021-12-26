@@ -293,20 +293,18 @@
             android:layout_weight="1"
             android:text="Ход противника1" />
 
-        <EditText
-            android:id="@+id/edOpponent1X"
+        <TextView
+            android:id="@+id/textOpponent1X"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="X"
-            android:inputType="number"
+            android:layout_weight="1"
             android:text="0" />
 
-        <EditText
-            android:id="@+id/edOpponent1Y"
+        <TextView
+            android:id="@+id/textOpponent1Y"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Y"
-            android:inputType="number"
+            android:layout_weight="1"
             android:text="0" />
 
         <TextView
@@ -316,20 +314,18 @@
             android:layout_weight="1"
             android:text="Ход противника2" />
 
-        <EditText
-            android:id="@+id/edOpponent2X"
+        <TextView
+            android:id="@+id/textOpponent2X"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="X"
-            android:inputType="number"
+            android:layout_weight="1"
             android:text="0" />
 
-        <EditText
-            android:id="@+id/edOpponent2Y"
+        <TextView
+            android:id="@+id/textOpponent2Y"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Y"
-            android:inputType="number"
+            android:layout_weight="1"
             android:text="0" />
 
     </LinearLayout>
