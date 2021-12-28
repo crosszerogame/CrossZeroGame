@@ -12,7 +12,7 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
         turnOfGamer = true
     )
     private var currentGamer = Gamer()
-    private val ai = AI(remoteOpponentGame)
+    private val ai = AI()
     private val rg = RemoteGame(db)
     private var countTurnGamer = 0
     private var countTurnOpponent = 0
@@ -175,10 +175,7 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
                     currentGame.motionYIndex = -1
                     return currentGame
                 }
-
                 currentGame.turnOfGamer = !currentGame.turnOfGamer
-
-
             }
             if (!currentGame.turnOfGamer) {
                 if (remoteOpponentGame) {

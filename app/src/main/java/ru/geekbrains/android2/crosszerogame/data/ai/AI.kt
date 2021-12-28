@@ -2,7 +2,7 @@ package ru.geekbrains.android2.crosszerogame.data.ai
 
 import ru.geekbrains.android2.crosszerogame.data.*
 
-class AI(val remoteOpponentGame: Boolean = false) {
+class AI() {
     private var SIZE = GameConstants.MIN_FIELD_SIZE
     private var DOTS_TO_WIN = GameConstants.DOTS_TO_WIN1
     private var lastXDOT_X = 0

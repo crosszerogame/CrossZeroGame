@@ -16,18 +16,22 @@ import ru.geekbrains.android2.crosszerogame.data.GameConstants.MIN_TIME_FOR_TURN
 data class Game(
     var keyGame: String = "",
     var gameFieldSize: Int = MIN_FIELD_SIZE,
-    var gameField: Array<Array<GameConstants.CellField>> = Array(gameFieldSize) { Array(gameFieldSize) { GameConstants.CellField.EMPTY } },
+    var gameField: Array<Array<GameConstants.CellField>> = Array(gameFieldSize) {
+        Array(
+            gameFieldSize
+        ) { GameConstants.CellField.EMPTY }
+    },
     var motionXIndex: Int = -1,
     var motionYIndex: Int = -1,
     var gameStatus: GameConstants.GameStatus = GameConstants.GameStatus.NEW_GAME,
     var dotsToWin: Int = DOTS_TO_WIN1_SIZE1,
     var turnOfGamer: Boolean = true,
     var timeForTurn: Int = MIN_TIME_FOR_TURN,
-    var countOfTurn:Int=0
+    var countOfTurn: Int = 0
 
 ) {
     init {
- //       if (motionXIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
+        //       if (motionXIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
 //            && motionYIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
 //        )
 //            gameField[motionYIndex][motionXIndex] =
@@ -64,9 +68,11 @@ data class Game(
         for ((j, arrCell) in gameField.withIndex()) {
             for ((i, cell) in arrCell.withIndex()) if (cell == GameConstants.CellField.GAMER) gameField[j][i] =
                 GameConstants.CellField.OPPONENT
-            else if (cell == GameConstants.CellField.OPPONENT) gameField[j][i] = GameConstants.CellField.GAMER
+            else if (cell == GameConstants.CellField.OPPONENT) gameField[j][i] =
+                GameConstants.CellField.GAMER
         }
     }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -85,21 +91,3 @@ data class Game(
         return result
     }
 }
-
-
-//enum class CellField {
-//    GAMER, OPPONENT, EMPTY
-//}
-
-//enum class GameStatus {
-//    GAME_IS_ON,
-//    WIN_GAMER,
-//    WIN_OPPONENT,
-//    DRAWN_GAME,
-//    ABORTED_GAME,
-//    NEW_GAME,
-//    NEW_GAME_FIRST_GAMER,
-//    NEW_GAME_FIRST_OPPONENT,
-//    NEW_GAME_ACCEPT
-//
-//}
