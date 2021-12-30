@@ -4,15 +4,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
-import ru.geekbrains.android2.crosszerogame.data.CellField
-import ru.geekbrains.android2.crosszerogame.data.Game
-import ru.geekbrains.android2.crosszerogame.data.GameStatus
-import ru.geekbrains.android2.crosszerogame.data.Gamer
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import ru.geekbrains.android2.crosszerogame.game.GameManagerImpl
+import ru.geekbrains.android2.crosszerogame.game.GameRepositoryImpl
+import ru.geekbrains.android2.crosszerogame.structure.GameManager
+import ru.geekbrains.android2.crosszerogame.structure.data.Cell
 import ru.geekbrains.android2.crosszerogame.view.list.CellValue
 
 class GameModel : ViewModel() {
     companion object {
+        private const val DELAY_TIME: Long = 100
         private const val DEFAULT_SIZE = 3
         private const val DEFAULT_FIRST = true
         private val parameters: MutableLiveData<GameParameters> = MutableLiveData()
@@ -22,91 +24,103 @@ class GameModel : ViewModel() {
         }
     }
 
-    private val state: MutableLiveData<GameState> = MutableLiveData()
-    private val ai = ArtIntelligence()
-    private var gamer = Gamer()
-    private var game = Game()
+    private val _state: MutableLiveData<GameState> = MutableLiveData()
+    private val manager: GameManager = GameManagerImpl(GameRepositoryImpl())
     private var size: Int = DEFAULT_SIZE
-    private var isFirst: Boolean = DEFAULT_FIRST
+    private var isReady = false
 
-    private val parametersObserver = Observer<GameParameters> {
-        size = it.fieldSize
-        isFirst = it.beginAsFirst
-        newGame()
-    }
-
-    fun getState(): LiveData<GameState> = state
+    val state: LiveData<GameState> = _state
 
     fun getFieldSize() = size
 
-    fun getCell(x: Int, y: Int) = when (game.gameField[y][x]) {
-        CellField.GAMER -> if (isFirst) CellValue.CROSS else CellValue.ZERO
-        CellField.OPPONENT -> if (isFirst) CellValue.ZERO else CellValue.CROSS
-        CellField.EMPTY -> CellValue.EMPTY
+    private val scope = CoroutineScope(
+        Dispatchers.Default
+                + SupervisorJob()
+                + CoroutineExceptionHandler { _, throwable ->
+            handleError(throwable)
+        })
+
+    private fun handleError(throwable: Throwable) {
+        println("Error GameModel:")
+        throwable.printStackTrace()
+        _state.postValue(GameState.AbortedGame)
+    }
+
+    private val parametersObserver = Observer<GameParameters> {
+        newGame(it.fieldSize, it.beginAsFirst)
+    }
+
+    fun getCell(x: Int, y: Int) = when (manager.getCell(x, y)) {
+        Cell.CROSS -> CellValue.CROSS
+        Cell.ZERO -> CellValue.ZERO
+        else -> CellValue.EMPTY
     }
 
     fun init() {
         parameters.observeForever(parametersObserver)
-        if (game.gameStatus == GameStatus.NEW_GAME)
-            newGame()
-        else
-            postState()
+        scope.launch {
+            manager.state.collect {
+                parseGameState(it)
+            }
+        }
+    }
+
+    private suspend fun parseGameState(state: GameManager.State) {
+        when (state) {
+            is GameManager.State.Move -> parseMove(state)
+            GameManager.State.Ready -> isReady = true
+            GameManager.State.WaitOpponent -> isReady = false
+            GameManager.State.AbortedGame -> this._state.postValue(GameState.AbortedGame)
+            GameManager.State.Created -> newGame(DEFAULT_SIZE, DEFAULT_FIRST)
+            is GameManager.State.Error -> handleError(state.error)
+        }
+    }
+
+    private suspend fun parseMove(move: GameManager.State.Move) = move.run {
+        if (result != GameManager.Result.CANCEL) {
+            postChip(x, y, isCross)
+            delay(DELAY_TIME)
+        }
+        isReady = false
+        when (result) {
+            GameManager.Result.TURN_PLAYER ->
+                isReady = true
+            GameManager.Result.WIN_PLAYER ->
+                _state.postValue(GameState.WinPlayer)
+            GameManager.Result.WIN_OPPONENT ->
+                _state.postValue(GameState.WinOpponent)
+            GameManager.Result.DRAWN ->
+                _state.postValue(GameState.DrawnGame)
+            //GameManager.Result.TURN_OPPONENT -> TODO show message
+            GameManager.Result.CANCEL ->
+                if (manager.gameIsFinish.not()) isReady = true
+        }
     }
 
     override fun onCleared() {
         parameters.removeObserver(parametersObserver)
+        scope.cancel()
         super.onCleared()
     }
 
-    private fun newGame() {
-        state.value = GameState.NewGame(size)
-        gamer = ai.newGamer(size)
-        game = ai.game(
-            gameStatus = if (isFirst)
-                GameStatus.NEW_GAME_FIRST_GAMER
-            else
-                GameStatus.NEW_GAME_FIRST_OPPONENT
-        )
+    private fun newGame(fieldSize: Int, beginAsFirst: Boolean) {
+        size = fieldSize
+        _state.postValue(GameState.NewGame(fieldSize))
+        scope.launch {
+            manager.createSingleGame(fieldSize, beginAsFirst)
+        }
     }
 
     fun doMove(x: Int, y: Int) {
-        if (game.gameStatus == GameStatus.GAME_IS_ON) {
-            state.value = GameState.MovePlayer(x, y, isFirst)
-            game = ai.game(
-                motionXIndex = x,
-                motionYIndex = y,
-                gameStatus = GameStatus.GAME_IS_ON
-            )
-        }
-        postState()
-    }
-
-    private fun postState() {
-        when (game.gameStatus) {
-            GameStatus.GAME_IS_ON ->
-                doAiMove()
-            GameStatus.WIN_GAMER ->
-                state.value = GameState.WinPlayer
-            GameStatus.WIN_OPPONENT -> {
-                doAiMove()
-                state.value = GameState.WinOpponent
-            }
-            GameStatus.DRAWN_GAME -> {
-                doAiMove()
-                state.value = GameState.DrawnGame
-            }
-            GameStatus.ABORTED_GAME ->
-                state.value = GameState.AbortedGame
+        scope.launch {
+            if (isReady)
+                manager.doMove(x, y)
+            else
+                parseGameState(manager.lastState)
         }
     }
 
-    private fun doAiMove() {
-        if (game.motionXIndex > -1)
-            state.value = GameState.MoveOpponent(game.motionXIndex, game.motionYIndex, !isFirst)
-    }
-
-    fun readyField() {
-        if (game.gameStatus == GameStatus.GAME_IS_ON && !isFirst)
-            doAiMove()
+    private fun postChip(x: Int, y: Int, isCross: Boolean) {
+        _state.postValue(GameState.PasteChip(x, y, isCross))
     }
 }

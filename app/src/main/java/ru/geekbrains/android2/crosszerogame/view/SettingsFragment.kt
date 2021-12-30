@@ -7,8 +7,9 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import ru.geekbrains.android2.crosszerogame.R
-import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence
 import ru.geekbrains.android2.crosszerogame.databinding.FragmentSettingsBinding
+import ru.geekbrains.android2.crosszerogame.game.GameRepositoryImpl
+import ru.geekbrains.android2.crosszerogame.structure.GameRepository
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
 
 class SettingsFragment : Fragment() {
@@ -16,7 +17,7 @@ class SettingsFragment : Fragment() {
         private const val SHIFT_SIZE = 3
     }
     private var binding: FragmentSettingsBinding? = null
-    private val ai = ArtIntelligence()
+    private val repository: GameRepository = GameRepositoryImpl()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,9 +43,8 @@ class SettingsFragment : Fragment() {
         sbFieldsize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
                 val size = i + SHIFT_SIZE
-                ai.newGamer(size)
-                val game = ai.game()
-                tvFieldsize.text = String.format(getString(R.string.field_size), size, size, game.dotsToWin)
+                val chipsForWin = repository.getChipsForWin(size)
+                tvFieldsize.text = String.format(getString(R.string.field_size), size, size, chipsForWin)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}

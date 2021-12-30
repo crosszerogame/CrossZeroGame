@@ -57,9 +57,8 @@ class GameFragment : Fragment(), BackEvent {
             override fun onFinish() {
                 resizeField(model.getFieldSize())
                 restoreField()
-                model.readyField()
                 if (!modelIsInit) {
-                    model.getState().observe(requireActivity()) {
+                    model.state.observe(requireActivity()) {
                         changeGameState(it)
                     }
                     model.init()
@@ -128,19 +127,15 @@ class GameFragment : Fragment(), BackEvent {
     private fun changeGameState(state: GameState) {
         dismissMessage()
         when (state) {
-            is GameState.MoveOpponent -> {
+            is GameState.PasteChip -> {
                 if (adapter.linear == Linear.HORIZONTAL)
                     rvField.smoothScrollToPosition(state.x)
                 else
                     rvField.smoothScrollToPosition(state.y)
                 doMove(state.x, state.y, state.isCross)
             }
-            is GameState.MovePlayer -> {
-                doMove(state.x, state.y, state.isCross)
-            }
-            is GameState.NewGame -> {
+            is GameState.NewGame ->
                 initField()
-            }
             GameState.WinPlayer -> showMessage(R.string.win_player)
             GameState.WinOpponent -> showMessage(R.string.win_opponent)
             GameState.DrawnGame -> showMessage(R.string.drawn)
