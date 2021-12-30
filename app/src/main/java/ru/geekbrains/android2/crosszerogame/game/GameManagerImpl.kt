@@ -22,11 +22,28 @@ class GameManagerImpl(private val repository: GameRepository) : GameManager {
     private var iIsCross: Boolean = false
 
     override suspend fun createSingleGame(fieldSize: Int, iIsCross: Boolean) {
+        createGame(fieldSize, iIsCross, AiOpponent(fieldSize, !iIsCross))
+    }
+
+    override suspend fun createRemoteGame(
+        fieldSize: Int,
+        myNick: String,
+        iIsCross: Boolean,
+        gameLevel: Int
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun connectTo(game: Game, myNick: String) {
+        TODO("Not yet implemented")
+    }
+
+    private suspend fun createGame(fieldSize: Int, iIsCross: Boolean, opponent: Opponent) {
         gameIsFinish = false
         repository.newGame(fieldSize)
         this.iIsCross = iIsCross
         emitState(GameManager.State.WaitOpponent)
-        opponent = AiOpponent(fieldSize, !iIsCross)
+        this.opponent = opponent
         opponent.preparing().collect {
             emitState(GameManager.State.Ready)
             observeOpponentState()
@@ -36,21 +53,6 @@ class GameManagerImpl(private val repository: GameRepository) : GameManager {
     private fun emitState(value: GameManager.State) {
         _state.tryEmit(value)
         lastState = value
-    }
-
-    override suspend fun createRemoteGame(
-        fieldSize: Int,
-        myNick: String,
-        iIsCross: Boolean,
-        gameLevel: Int
-    ) {
-        gameIsFinish = false
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun connectTo(game: Game, myNick: String) {
-        gameIsFinish = false
-        TODO("Not yet implemented")
     }
 
     override fun getGames(): Flow<List<Game>> {
