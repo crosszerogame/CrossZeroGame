@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flow
 import ru.geekbrains.android2.crosszerogame.structure.Opponent
 import ru.geekbrains.android2.crosszerogame.structure.data.Player
 
-class NonOpponent : Opponent {
+class NullOpponent : Opponent {
     override val state: Flow<Opponent.State> = MutableStateFlow(Opponent.State.Leave)
 
     override fun preparing(): Flow<Player> = flow {

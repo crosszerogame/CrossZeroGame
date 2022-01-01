@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import ru.geekbrains.android2.crosszerogame.game.opponents.AiOpponent
-import ru.geekbrains.android2.crosszerogame.game.opponents.NonOpponent
+import ru.geekbrains.android2.crosszerogame.game.opponents.NullOpponent
 import ru.geekbrains.android2.crosszerogame.structure.GameManager
 import ru.geekbrains.android2.crosszerogame.structure.GameRepository
 import ru.geekbrains.android2.crosszerogame.structure.Opponent
@@ -18,7 +18,7 @@ class GameManagerImpl(private val repository: GameRepository) : GameManager {
         private set
     override var gameIsFinish: Boolean = true
         private set
-    private var opponent: Opponent = NonOpponent()
+    private var opponent: Opponent = NullOpponent()
     private var iIsCross: Boolean = false
 
     override suspend fun createSingleGame(fieldSize: Int, iIsCross: Boolean) {
