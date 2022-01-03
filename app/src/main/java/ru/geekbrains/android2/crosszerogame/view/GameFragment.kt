@@ -1,10 +1,8 @@
 package ru.geekbrains.android2.crosszerogame.view
 
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.utils.BackEvent
+import ru.geekbrains.android2.crosszerogame.utils.getTextColor
+import ru.geekbrains.android2.crosszerogame.utils.setSubtitle
 import ru.geekbrains.android2.crosszerogame.view.list.FieldAdapter
 import ru.geekbrains.android2.crosszerogame.view.list.Linear
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
@@ -126,6 +126,7 @@ class GameFragment : Fragment(), BackEvent {
 
     private fun changeGameState(state: GameState) {
         dismissMessage()
+        setSubtitle("")
         when (state) {
             is GameState.PasteChip -> {
                 if (adapter.linear == Linear.HORIZONTAL)
@@ -140,29 +141,20 @@ class GameFragment : Fragment(), BackEvent {
             GameState.WinOpponent -> showMessage(R.string.win_opponent)
             GameState.DrawnGame -> showMessage(R.string.drawn)
             GameState.AbortedGame -> showMessage(R.string.aborted_game)
-            GameState.WaitOpponent -> showMessage(R.string.wait_opponent, false)
+            GameState.WaitOpponent -> setSubtitle(getString(R.string.wait_opponent))
         }
     }
 
-    private fun showMessage(stringId: Int, withAction: Boolean = true) {
+    private fun showMessage(stringId: Int) {
         messageBar = Snackbar.make(rvField, stringId, Snackbar.LENGTH_INDEFINITE)
         messageBar?.run {
-            if (withAction) {
-                setActionTextColor(getTextColor())
-                setAction(android.R.string.ok) {
-                    onMessageAction?.invoke()
-                    dismissMessage()
-                }
+            setActionTextColor(getTextColor())
+            setAction(android.R.string.ok) {
+                onMessageAction?.invoke()
+                dismissMessage()
             }
             show()
         }
-    }
-
-    private fun getTextColor(): Int {
-        val typedValue = TypedValue()
-        val theme: Resources.Theme = requireContext().theme
-        theme.resolveAttribute(R.attr.colorOnSecondary, typedValue, true)
-        return typedValue.data
     }
 
     private fun dismissMessage() {

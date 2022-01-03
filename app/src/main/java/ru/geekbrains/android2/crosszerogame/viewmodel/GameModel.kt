@@ -97,7 +97,8 @@ class GameModel : ViewModel() {
                 _state.postValue(GameState.WinOpponent)
             GameManager.Result.DRAWN ->
                 _state.postValue(GameState.DrawnGame)
-            //GameManager.Result.TURN_OPPONENT -> TODO show message
+            GameManager.Result.TURN_OPPONENT ->
+                _state.postValue(GameState.WaitOpponent)
             GameManager.Result.CANCEL ->
                 if (manager.gameIsFinish.not()) isReady = true
         }
