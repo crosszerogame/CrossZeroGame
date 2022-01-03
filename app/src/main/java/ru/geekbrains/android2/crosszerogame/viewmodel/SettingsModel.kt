@@ -63,8 +63,11 @@ class SettingsModel : ViewModel() {
 
     override fun onCleared() {
         scope.cancel()
-        settings.save()
         super.onCleared()
+    }
+
+    fun save() {
+        settings.save()
     }
 
     fun getFieldSizeString(value: Int): String {

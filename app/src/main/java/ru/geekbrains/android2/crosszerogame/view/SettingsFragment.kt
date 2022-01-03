@@ -24,7 +24,6 @@ import ru.geekbrains.android2.crosszerogame.utils.strings.SettingsStrings
 import ru.geekbrains.android2.crosszerogame.viewmodel.SettingsModel
 import ru.geekbrains.android2.crosszerogame.viewmodel.SettingsState
 
-
 class SettingsFragment : Fragment() {
     companion object {
         private const val DEFAULT_SIZE = 0
@@ -48,6 +47,8 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initModelView()
+
         if (savedInstanceState == null) {
             binding?.run {
                 btnSingleLaunch.isChecked = true
@@ -57,7 +58,6 @@ class SettingsFragment : Fragment() {
         } else
             setTab(model.tab)
 
-        initModelView()
         initSections()
         initSingleLaunch()
         initRemoteLaunch()
@@ -97,6 +97,7 @@ class SettingsFragment : Fragment() {
         }
         with(containerRemoteLaunch) {
             etNick.setText(state.nick)
+            etNick.setSelection(state.nick.length)
             if (state.beginAsFirst)
                 btnFirst.isChecked = true
             else
@@ -105,6 +106,7 @@ class SettingsFragment : Fragment() {
             sbLevel.progress = state.gameLevel
         }
         containerRemoteConnect.etNick.setText(state.nick)
+        containerRemoteConnect.etNick.setSelection(state.nick.length)
         model.checkNick(state.nick)
     }
 
@@ -227,18 +229,8 @@ class SettingsFragment : Fragment() {
             til.error = null
             model.checkNick(text.toString())
         }
-        et.setOnFocusChangeListener { _, hasFocus ->
-            binding?.bgSectionsH?.visibility =
-                if (hasFocus) View.GONE
-                else View.VISIBLE
-        }
-        et.setOnKeyListener(View.OnKeyListener { view, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_BACK) {
-                binding?.run {
-                    containerRemoteLaunch.etNick.clearFocus()
-                    containerRemoteConnect.etNick.clearFocus()
-                }
-                // view.clearFocus()
+        et.setOnKeyListener(View.OnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER) {
                 hideKeyboard()
                 return@OnKeyListener true
             }
@@ -248,7 +240,6 @@ class SettingsFragment : Fragment() {
 
     private fun hideKeyboard() {
         try {
-            // TODO не работает на смартфоне
             val act = requireActivity()
             val inputMethodManager: InputMethodManager =
                 act.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -285,6 +276,7 @@ class SettingsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        model.save()
         binding = null
     }
 }

@@ -11,7 +11,7 @@ class SettingsImpl(context: Context) : Settings {
         private const val NICK = "Nick"
         private const val GAME_LEVEL = "GameLevel"
         private const val DEFAULT_BEGIN_AS_FIRST = true
-        private const val DEFAULT_FIELD_SIZE = 3
+        private const val DEFAULT_FIELD_SIZE = 0
         private const val DEFAULT_NICK = ""
         private const val DEFAULT_GAME_LEVEL = 2
     }
