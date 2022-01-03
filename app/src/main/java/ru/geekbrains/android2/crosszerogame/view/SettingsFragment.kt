@@ -91,7 +91,8 @@ class SettingsFragment : Fragment() {
     private fun showGames(games: List<Game>) {
         binding?.containerRemoteConnect?.run {
             pbLoad.visibility = View.GONE
-            vBlock.visibility = View.GONE
+            if (tilNick.error == null)
+                vBlock.visibility = View.GONE
         }
         adapter.setItems(games)
     }
@@ -128,7 +129,8 @@ class SettingsFragment : Fragment() {
         if (isAvailable) {
             containerRemoteLaunch.tilNick.error = null
             containerRemoteConnect.tilNick.error = null
-            containerRemoteConnect.vBlock.visibility = View.GONE
+            if (containerRemoteConnect.pbLoad.visibility == View.GONE)
+                containerRemoteConnect.vBlock.visibility = View.GONE
         } else {
             containerRemoteLaunch.tilNick.error = getString(R.string.unavailable_nick)
             containerRemoteConnect.tilNick.error = getString(R.string.unavailable_nick)
