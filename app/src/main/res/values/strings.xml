@@ -5,6 +5,7 @@
     <string name="second">вторым</string>
     <string name="field_size">Размер поля %d на %d, для победы: %d</string>
     <string name="game_level">Уровень игры: %d</string>
+    <string name="error">Ошибка:&#160;</string>
     <string name="start">Начать</string>
     <string name="settings">Настройки</string>
     <string name="drawn">Ничья</string>

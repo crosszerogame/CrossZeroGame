@@ -15,6 +15,7 @@ import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.databinding.FragmentSettingsBinding
 import android.view.inputmethod.InputMethodManager
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.layout_remote_connector.*
 import ru.geekbrains.android2.crosszerogame.structure.data.Game
@@ -138,8 +139,12 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun showError(error: Throwable) {
-        //TODO
+    private fun showError(error: Throwable) = binding?.run {
+        Snackbar.make(
+            root,
+            getString(R.string.error) + error.message,
+            Snackbar.LENGTH_LONG
+        ).show()
     }
 
     private fun initSections() = binding?.run {
