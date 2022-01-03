@@ -8,6 +8,7 @@ import ru.geekbrains.android2.crosszerogame.game.GameRepositoryImpl
 import ru.geekbrains.android2.crosszerogame.structure.GameRepository
 import ru.geekbrains.android2.crosszerogame.structure.data.Game
 import ru.geekbrains.android2.crosszerogame.structure.data.Player
+import ru.geekbrains.android2.crosszerogame.utils.Settings
 import ru.geekbrains.android2.crosszerogame.utils.strings.SettingsStrings
 
 class SettingsModel : ViewModel() {
@@ -24,6 +25,7 @@ class SettingsModel : ViewModel() {
 
     private val repository: GameRepository = GameRepositoryImpl()
     private lateinit var strings: SettingsStrings
+    private lateinit var settings: Settings
     private val _state: MutableLiveData<SettingsState> = MutableLiveData()
     val state: LiveData<SettingsState> = _state
     private var nickJob: Job? = null
@@ -42,23 +44,35 @@ class SettingsModel : ViewModel() {
         _state.postValue(SettingsState.Error(error))
     }
 
-    fun init(strings: SettingsStrings) {
+    fun init(settings: Settings, strings: SettingsStrings) {
+        this.settings = settings
         this.strings = strings
+        _state.postValue(
+            SettingsState.Settings(
+                beginAsFirst = settings.getBeginAsFirst(),
+                fieldSize = settings.getFieldSize(),
+                nick = settings.getNick(),
+                gameLevel = settings.getGameLevel()
+            )
+        )
     }
 
     override fun onCleared() {
         scope.cancel()
+        settings.save()
         super.onCleared()
     }
 
-    fun getFieldSizeString(v: Int): String {
-        val size = v + SHIFT_SIZE
+    fun getFieldSizeString(value: Int): String {
+        settings.setFieldSize(value)
+        val size = value + SHIFT_SIZE
         val chipsForWin = repository.getChipsForWin(size)
         return String.format(strings.fieldSizeFormat, size, size, chipsForWin)
     }
 
-    fun getGameLevelString(v: Int): String {
-        val level = v + SHIFT_LEVEL
+    fun getGameLevelString(value: Int): String {
+        settings.setGameLevel(value)
+        val level = value + SHIFT_LEVEL
         return String.format(strings.gameLevelFormat, level)
     }
 
@@ -149,6 +163,7 @@ class SettingsModel : ViewModel() {
 
     fun checkNick(nick: String) {
         //TODO проверить на сервере доступность ника через 2 секунды после запуска
+        settings.setNick(nick)
         nickJob?.cancel()
         nickJob = scope.launch {
             delay(2000)
@@ -157,5 +172,9 @@ class SettingsModel : ViewModel() {
             else
                 _state.postValue(SettingsState.AvailableNick)
         }
+    }
+
+    fun setFirst(value: Boolean) {
+        settings.setBeginAsFirst(value)
     }
 }

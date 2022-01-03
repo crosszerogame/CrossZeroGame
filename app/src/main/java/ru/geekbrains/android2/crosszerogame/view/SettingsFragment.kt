@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.layout_remote_connector.*
+import ru.geekbrains.android2.crosszerogame.utils.SettingsImpl
 import ru.geekbrains.android2.crosszerogame.view.list.GameAdapter
 import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings
 import ru.geekbrains.android2.crosszerogame.utils.strings.SettingsStrings
@@ -68,7 +69,8 @@ class SettingsFragment : Fragment() {
             parseState(it)
         }
         model.init(
-            SettingsStrings(
+            settings = SettingsImpl(requireContext()),
+            strings = SettingsStrings(
                 fieldSizeFormat = getString(R.string.field_size),
                 gameLevelFormat = getString(R.string.game_level)
             )
@@ -77,6 +79,7 @@ class SettingsFragment : Fragment() {
 
     private fun parseState(state: SettingsState) {
         when (state) {
+            is SettingsState.Settings -> loadSettings(state)
             SettingsState.AvailableNick -> showNick(true)
             SettingsState.UnavailableNick -> showNick(false)
             is SettingsState.Games -> adapter.setItems(state.games)
@@ -84,20 +87,42 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun showNick(isAvailable: Boolean) = binding?.run {
-        val til = if (btnRemoteLaunch.isChecked) {
-            containerRemoteLaunch.btnCreate.isEnabled = isAvailable
-            containerRemoteLaunch.tilNick
-        } else {
-            containerRemoteConnect.vBlock.visibility = if (isAvailable)
-                View.GONE else View.VISIBLE
-            containerRemoteConnect.tilNick
+    private fun loadSettings(state: SettingsState.Settings) = binding?.run {
+        with(containerSingleLaunch) {
+            if (state.beginAsFirst)
+                btnFirst.isChecked = true
+            else
+                btnSecond.isChecked = true
+            sbFieldsize.progress = state.fieldSize
         }
+        with(containerRemoteLaunch) {
+            etNick.setText(state.nick)
+            if (state.beginAsFirst)
+                btnFirst.isChecked = true
+            else
+                btnSecond.isChecked = true
+            sbFieldsize.progress = state.fieldSize
+            sbLevel.progress = state.gameLevel
+        }
+        containerRemoteConnect.etNick.setText(state.nick)
+        model.checkNick(state.nick)
+    }
 
-        if (isAvailable)
-            til.error = null
+    private fun showNick(isAvailable: Boolean) = binding?.run {
+        if (btnRemoteLaunch.isChecked)
+            containerRemoteConnect.etNick.text = containerRemoteLaunch.etNick.text
         else
-            til.error = getString(R.string.unavailable_nick)
+            containerRemoteLaunch.etNick.text = containerRemoteConnect.etNick.text
+        containerRemoteLaunch.btnCreate.isEnabled = isAvailable
+        if (isAvailable) {
+            containerRemoteLaunch.tilNick.error = null
+            containerRemoteConnect.tilNick.error = null
+            containerRemoteConnect.vBlock.visibility = View.GONE
+        } else {
+            containerRemoteLaunch.tilNick.error = getString(R.string.unavailable_nick)
+            containerRemoteConnect.tilNick.error = getString(R.string.unavailable_nick)
+            containerRemoteConnect.vBlock.visibility = View.VISIBLE
+        }
     }
 
     private fun showError(error: Throwable) {
@@ -162,6 +187,12 @@ class SettingsFragment : Fragment() {
         initFieldSize(sbFieldsize, tvFieldsize)
         initLevel()
         initNickInput(tilNick, etNick)
+        btnFirst.setOnClickListener {
+            model.setFirst(true)
+        }
+        btnSecond.setOnClickListener {
+            model.setFirst(false)
+        }
         btnCreate.setOnClickListener {
             model.launchGame(
                 fieldSize = sbFieldsize.progress,
@@ -176,6 +207,12 @@ class SettingsFragment : Fragment() {
     private fun initSingleLaunch() = binding?.containerSingleLaunch?.run {
         btnFirst.isChecked = true
         initFieldSize(sbFieldsize, tvFieldsize)
+        btnFirst.setOnClickListener {
+            model.setFirst(true)
+        }
+        btnSecond.setOnClickListener {
+            model.setFirst(false)
+        }
         btnStart.setOnClickListener {
             model.launchGame(
                 fieldSize = sbFieldsize.progress,
@@ -201,7 +238,7 @@ class SettingsFragment : Fragment() {
                     containerRemoteLaunch.etNick.clearFocus()
                     containerRemoteConnect.etNick.clearFocus()
                 }
-               // view.clearFocus()
+                // view.clearFocus()
                 hideKeyboard()
                 return@OnKeyListener true
             }
