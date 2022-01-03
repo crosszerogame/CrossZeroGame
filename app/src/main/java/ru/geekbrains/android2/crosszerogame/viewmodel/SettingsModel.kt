@@ -10,6 +10,7 @@ import ru.geekbrains.android2.crosszerogame.structure.data.Game
 import ru.geekbrains.android2.crosszerogame.structure.data.Player
 import ru.geekbrains.android2.crosszerogame.utils.Settings
 import ru.geekbrains.android2.crosszerogame.utils.strings.SettingsStrings
+import java.util.regex.Pattern
 
 class SettingsModel : ViewModel() {
     enum class Tab {
@@ -20,7 +21,10 @@ class SettingsModel : ViewModel() {
         private const val SHIFT_SIZE = 3
         private const val SHIFT_LEVEL = 1
         private const val MIN_LENGTH_NICK = 3
+        private const val MAX_LENGTH_NICK = 20
+        private const val TIME_FOR_FILTER = 2000L
         private val DEFAULT_TAB = Tab.SINGLE
+        private const val NICK_FORMAT = "^[\\w\\s]+\$"
     }
 
     private val repository: GameRepository = GameRepositoryImpl()
@@ -166,11 +170,17 @@ class SettingsModel : ViewModel() {
         settings.setNick(nick)
         nickJob?.cancel()
         nickJob = scope.launch {
-            delay(2000)
-            if (nick.length < MIN_LENGTH_NICK || nick.contains(" "))
+            delay(TIME_FOR_FILTER)
+            if (nick.length < MIN_LENGTH_NICK || nick.length > MAX_LENGTH_NICK)
                 _state.postValue(SettingsState.UnavailableNick)
-            else
-                _state.postValue(SettingsState.AvailableNick)
+            else {
+                val pattern = Pattern.compile(NICK_FORMAT)
+                val m = pattern.matcher(nick)
+                if (m.find())
+                    _state.postValue(SettingsState.AvailableNick)
+                else
+                    _state.postValue(SettingsState.UnavailableNick)
+            }
         }
     }
 
