@@ -3,5 +3,6 @@
     <dimen name="normal_indent">4dp</dimen>
     <dimen name="big_indent">8dp</dimen>
     <dimen name="normal_text">16sp</dimen>
+    <dimen name="games_list_height">227dp</dimen>
     <integer name="maxLengthNick">20</integer>
 </resources>

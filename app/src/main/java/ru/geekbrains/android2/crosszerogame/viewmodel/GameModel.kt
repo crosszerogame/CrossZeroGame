@@ -19,19 +19,18 @@ class GameModel : ViewModel() {
         private const val DEFAULT_FIRST = true
         private val parameters: MutableLiveData<GameParameters> = MutableLiveData()
 
-        fun launchGame(fieldSize: Int, beginAsFirst: Boolean) {
-            parameters.value = GameParameters(fieldSize, beginAsFirst)
+        fun launchGame(value: GameParameters) {
+            parameters.value = value
         }
     }
 
     private val _state: MutableLiveData<GameState> = MutableLiveData()
+    val state: LiveData<GameState> = _state
     private val manager: GameManager = GameManagerImpl(GameRepositoryImpl())
     private var size: Int = DEFAULT_SIZE
+    val fieldSize: Int
+        get() = size
     private var isReady = false
-
-    val state: LiveData<GameState> = _state
-
-    fun getFieldSize() = size
 
     private val scope = CoroutineScope(
         Dispatchers.Default
@@ -40,14 +39,21 @@ class GameModel : ViewModel() {
             handleError(throwable)
         })
 
-    private fun handleError(throwable: Throwable) {
+    private fun handleError(error: Throwable) {
         println("Error GameModel:")
-        throwable.printStackTrace()
+        error.printStackTrace()
         _state.postValue(GameState.AbortedGame)
     }
 
     private val parametersObserver = Observer<GameParameters> {
-        newGame(it.fieldSize, it.beginAsFirst)
+        when (it) {
+            is GameParameters.SingleLaunch ->
+                newGame(it.fieldSize, it.beginAsFirst)
+            is GameParameters.RemoteLaunch ->
+                TODO()
+            is GameParameters.RemoteConnect ->
+                TODO()
+        }
     }
 
     fun getCell(x: Int, y: Int) = when (manager.getCell(x, y)) {

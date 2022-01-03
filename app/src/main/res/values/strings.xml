@@ -4,6 +4,7 @@
     <string name="first">первым</string>
     <string name="second">вторым</string>
     <string name="field_size">Размер поля %d на %d, для победы: %d</string>
+    <string name="game_level">Уровень игры: %d</string>
     <string name="start">Начать</string>
     <string name="settings">Настройки</string>
     <string name="drawn">Ничья</string>
@@ -11,4 +12,12 @@
     <string name="win_opponent">Победил противник</string>
     <string name="aborted_game">Игра прервана</string>
     <string name="wait_opponent">Ожидание хода противника</string>
+    <string name="single_game">Одиночная игра</string>
+    <string name="create_remote">Создать сетевую</string>
+    <string name="connect">Подключиться</string>
+    <string name="nick">Никнейм</string>
+    <string name="create">Создать</string>
+    <string name="wait_cross">Ожидается игрок за Крестики</string>
+    <string name="wait_zero">Ожидается игрок за Нолики</string>
+    <string name="unavailable_nick">Недоступный ник</string>
 </resources>

@@ -1,8 +1,10 @@
 package ru.geekbrains.android2.crosszerogame.view
 
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
+import ru.geekbrains.android2.crosszerogame.utils.BackEvent
 import ru.geekbrains.android2.crosszerogame.view.list.FieldAdapter
 import ru.geekbrains.android2.crosszerogame.view.list.Linear
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
@@ -23,9 +26,9 @@ class GameFragment : Fragment(), BackEvent {
     }
     private lateinit var rvField: RecyclerView
     private lateinit var adapter: FieldAdapter
-    private var modelIsInit = false
     private var messageBar: Snackbar? = null
     var onMessageAction: (() -> Unit)? = null
+    var onHideBottom: (() -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,6 +41,10 @@ class GameFragment : Fragment(), BackEvent {
         super.onViewCreated(view, savedInstanceState)
         rvField = view.findViewById(R.id.rv_field) as RecyclerView
         initField()
+        model.state.observe(requireActivity()) {
+            changeGameState(it)
+        }
+        model.init()
     }
 
     private fun initField() {
@@ -55,15 +62,8 @@ class GameFragment : Fragment(), BackEvent {
             }
 
             override fun onFinish() {
-                resizeField(model.getFieldSize())
+                resizeField(model.fieldSize)
                 restoreField()
-                if (!modelIsInit) {
-                    model.state.observe(requireActivity()) {
-                        changeGameState(it)
-                    }
-                    model.init()
-                    modelIsInit = true
-                }
                 rvField.visibility = View.VISIBLE
             }
         }.start()
@@ -90,6 +90,7 @@ class GameFragment : Fragment(), BackEvent {
             cellSize = countCellSize(linear, fieldSize),
             linear = linear
         ) { x, y ->
+            onHideBottom?.invoke()
             model.doMove(x, y)
         }
         rvField.adapter = adapter
@@ -115,9 +116,8 @@ class GameFragment : Fragment(), BackEvent {
     }
 
     private fun restoreField() {
-        val size = model.getFieldSize()
-        for (x in 0 until size) {
-            for (y in 0 until size) {
+        for (x in 0 until model.fieldSize) {
+            for (y in 0 until model.fieldSize) {
                 adapter.setCell(x, y, model.getCell(x, y))
             }
         }
@@ -146,12 +146,23 @@ class GameFragment : Fragment(), BackEvent {
 
     private fun showMessage(stringId: Int, withAction: Boolean = true) {
         messageBar = Snackbar.make(rvField, stringId, Snackbar.LENGTH_INDEFINITE)
-        if (withAction)
-            messageBar?.setAction(android.R.string.ok) {
-                onMessageAction?.invoke()
-                dismissMessage()
+        messageBar?.run {
+            if (withAction) {
+                setActionTextColor(getTextColor())
+                setAction(android.R.string.ok) {
+                    onMessageAction?.invoke()
+                    dismissMessage()
+                }
             }
-        messageBar?.show()
+            show()
+        }
+    }
+
+    private fun getTextColor(): Int {
+        val typedValue = TypedValue()
+        val theme: Resources.Theme = requireContext().theme
+        theme.resolveAttribute(R.attr.colorOnSecondary, typedValue, true)
+        return typedValue.data
     }
 
     private fun dismissMessage() {
