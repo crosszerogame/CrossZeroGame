@@ -1,14 +1,17 @@
 package ru.geekbrains.android2.crosszerogame.game
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import ru.geekbrains.android2.crosszerogame.game.opponents.AiOpponent
 import ru.geekbrains.android2.crosszerogame.game.opponents.NullOpponent
 import ru.geekbrains.android2.crosszerogame.structure.GameManager
 import ru.geekbrains.android2.crosszerogame.structure.GameRepository
 import ru.geekbrains.android2.crosszerogame.structure.Opponent
 import ru.geekbrains.android2.crosszerogame.structure.data.Game
+import ru.geekbrains.android2.crosszerogame.structure.data.Player
 
 class GameManagerImpl(private val repository: GameRepository) : GameManager {
     private val _state = MutableStateFlow<GameManager.State>(GameManager.State.Created)
@@ -55,8 +58,57 @@ class GameManagerImpl(private val repository: GameRepository) : GameManager {
         lastState = value
     }
 
-    override fun getGames(): Flow<List<Game>> {
-        TODO("Not yet implemented")
+    override fun getGames(): Flow<List<Game>> = flow{
+        delay(2000)
+        val game1 = Game(
+            id = 1,
+            fieldSize = 3,
+            chipsForWin = 3,
+            level = 3,
+            playerCross = Player(
+                id = 1,
+                nick = "Nick1",
+                lastTimeActive = 0
+            ),
+            playerZero = null
+        )
+        val game2 = Game(
+            id = 2,
+            fieldSize = 4,
+            chipsForWin = 3,
+            level = 4,
+            playerCross = null,
+            playerZero = Player(
+                id = 2,
+                nick = "Nick2",
+                lastTimeActive = 0
+            )
+        )
+        val game3 = Game(
+            id = 3,
+            fieldSize = 6,
+            chipsForWin = 4,
+            level = 2,
+            playerCross = null,
+            playerZero = Player(
+                id = 3,
+                nick = "Nick3",
+                lastTimeActive = 0
+            )
+        )
+        val game4 = Game(
+            id = 4,
+            fieldSize = 9,
+            chipsForWin = 4,
+            level = 1,
+            playerCross = Player(
+                id = 4,
+                nick = "Nick4Nick4Nick4Nick4",
+                lastTimeActive = 0
+            ),
+            playerZero = null
+        )
+        emit(listOf(game1, game2, game3, game4))
     }
 
     private suspend fun observeOpponentState() {

@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.layout_remote_connector.*
+import ru.geekbrains.android2.crosszerogame.structure.data.Game
 import ru.geekbrains.android2.crosszerogame.utils.SettingsImpl
 import ru.geekbrains.android2.crosszerogame.view.list.GameAdapter
 import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings
@@ -82,9 +83,17 @@ class SettingsFragment : Fragment() {
             is SettingsState.Settings -> loadSettings(state)
             SettingsState.AvailableNick -> showNick(true)
             SettingsState.UnavailableNick -> showNick(false)
-            is SettingsState.Games -> adapter.setItems(state.games)
+            is SettingsState.Games -> showGames(state.games)
             is SettingsState.Error -> showError(state.error)
         }
+    }
+
+    private fun showGames(games: List<Game>) {
+        binding?.containerRemoteConnect?.run {
+            pbLoad.visibility = View.GONE
+            vBlock.visibility = View.GONE
+        }
+        adapter.setItems(games)
     }
 
     private fun loadSettings(state: SettingsState.Settings) = binding?.run {
@@ -160,7 +169,7 @@ class SettingsFragment : Fragment() {
                 containerSingleLaunch.root.visibility = View.GONE
                 containerRemoteLaunch.root.visibility = View.GONE
                 containerRemoteConnect.root.visibility = View.VISIBLE
-                model.loadGames()
+                loadingGames()
             }
         }
     }
@@ -180,8 +189,16 @@ class SettingsFragment : Fragment() {
         rvGames.adapter = adapter
         adapter.notifyDataSetChanged()
         btnRefresh.setOnClickListener {
-            model.loadGames()
+            loadingGames()
         }
+    }
+
+    private fun loadingGames() {
+        binding?.containerRemoteConnect?.run {
+            vBlock.visibility = View.VISIBLE
+            pbLoad.visibility = View.VISIBLE
+        }
+        model.loadGames()
     }
 
     private fun initRemoteLaunch() = binding?.containerRemoteLaunch?.run {

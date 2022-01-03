@@ -13,8 +13,8 @@
         android:hint="@string/nick"
         app:counterEnabled="true"
         app:counterMaxLength="@integer/maxLengthNick"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btn_refresh"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -30,10 +30,10 @@
         android:layout_width="50dp"
         android:layout_height="70dp"
         app:icon="@drawable/ic_refresh"
-        app:iconTint="?attr/colorOnSecondary"
-        app:iconSize="50dp"
-        app:iconPadding="@dimen/normal_indent"
         app:iconGravity="textStart"
+        app:iconPadding="@dimen/normal_indent"
+        app:iconSize="50dp"
+        app:iconTint="?attr/colorOnSecondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -53,6 +53,17 @@
         android:layout_height="0dp"
         android:background="?attr/translucent_bg"
         android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="@id/rv_games"
+        app:layout_constraintEnd_toEndOf="@id/rv_games"
+        app:layout_constraintStart_toStartOf="@id/rv_games"
+        app:layout_constraintTop_toTopOf="@id/rv_games" />
+
+    <ProgressBar
+        android:id="@+id/pb_load"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/rv_games"
         app:layout_constraintEnd_toEndOf="@id/rv_games"
         app:layout_constraintStart_toStartOf="@id/rv_games"
