@@ -137,6 +137,7 @@ class GameManagerImpl(private val repository: GameRepository) : GameManager {
     }
 
     override suspend fun finishGame() {
+        gameIsFinish = true
         opponent.sendBye()
     }
 

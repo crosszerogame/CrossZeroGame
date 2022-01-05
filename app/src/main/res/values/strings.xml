@@ -21,4 +21,7 @@
     <string name="wait_cross">Ожидается игрок за Крестики</string>
     <string name="wait_zero">Ожидается игрок за Нолики</string>
     <string name="unavailable_nick">Недоступный ник</string>
+    <string name="time_player">На ваш ход %d сек</string>
+    <string name="time_opponent">На ход оппонента %d сек</string>
+    <string name="timeout">Время вышло</string>
 </resources>

@@ -142,6 +142,19 @@ class GameFragment : Fragment(), BackEvent {
             GameState.DrawnGame -> showMessage(R.string.drawn)
             GameState.AbortedGame -> showMessage(R.string.aborted_game)
             GameState.WaitOpponent -> setSubtitle(getString(R.string.wait_opponent))
+            is GameState.TimeOpponent -> setSubtitle(
+                String.format(
+                    getString(R.string.time_opponent),
+                    state.sec
+                )
+            )
+            is GameState.TimePlayer -> setSubtitle(
+                String.format(
+                    getString(R.string.time_player),
+                    state.sec
+                )
+            )
+            GameState.Timeout -> showMessage(R.string.timeout)
         }
     }
 

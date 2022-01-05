@@ -66,7 +66,7 @@ class GameRepositoryImpl : GameRepository {
     }
 
     private fun isValidCell(x: Int, y: Int): Boolean =
-        x < field.size && y < field.size && field[y][x] == Cell.EMPTY
+        x < field.size && y < field.size && x > -1 && y > -1 && field[y][x] == Cell.EMPTY
 
     private suspend fun isWin(chip: Cell, x: Int, y: Int): Boolean =
         calcStep(chip, x, y).step >= chipsForWin
