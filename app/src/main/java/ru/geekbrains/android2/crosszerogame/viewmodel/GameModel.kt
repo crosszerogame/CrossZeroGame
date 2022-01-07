@@ -57,8 +57,10 @@ class GameModel : ViewModel(), MoveTimer.Callback {
                 timer = MoveTimer(this, DEFAULT_SEC_FOR_MOVE + (it.fieldSize - DEFAULT_SIZE) * 3)
                 newGame(it.fieldSize, it.beginAsFirst)
             }
-            is GameParameters.RemoteLaunch ->
+            is GameParameters.RemoteLaunch -> {
+                timer = MoveTimer(this, it.time)
                 TODO()
+            }
             is GameParameters.RemoteConnect ->
                 TODO()
         }

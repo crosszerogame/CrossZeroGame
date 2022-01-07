@@ -10,10 +10,12 @@ class SettingsImpl(context: Context) : Settings {
         private const val FIELD_SIZE = "FieldSize"
         private const val NICK = "Nick"
         private const val GAME_LEVEL = "GameLevel"
+        private const val TIME = "Time"
         private const val DEFAULT_BEGIN_AS_FIRST = true
         private const val DEFAULT_FIELD_SIZE = 0
         private const val DEFAULT_NICK = ""
         private const val DEFAULT_GAME_LEVEL = 2
+        private const val DEFAULT_TIME = -1
     }
 
     private var isChanged = false
@@ -58,6 +60,22 @@ class SettingsImpl(context: Context) : Settings {
 
     override fun setGameLevel(value: Int) {
         editor.putInt(GAME_LEVEL, value)
+        isChanged = true
+    }
+
+    override fun getMoveTime(): Int =
+        pref.getInt(TIME, DEFAULT_TIME)
+
+    override fun setMoveTime(value: Int) {
+        editor.putInt(TIME, value)
+        isChanged = true
+    }
+
+    override fun isCalMoveTime(): Boolean =
+        getMoveTime() == DEFAULT_TIME
+
+    override fun onCalcMoveTime() {
+        editor.putInt(TIME, DEFAULT_TIME)
         isChanged = true
     }
 }

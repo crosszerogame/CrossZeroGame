@@ -5,6 +5,7 @@ data class Game(
     val fieldSize: Int,
     val chipsForWin: Int,
     val level: Int,
+    val moveTime: Int,
     val playerCross: Player?,
     val playerZero: Player?
 )

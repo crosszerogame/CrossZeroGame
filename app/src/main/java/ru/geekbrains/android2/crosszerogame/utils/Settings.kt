@@ -10,4 +10,8 @@ interface Settings {
     fun setNick(value: String)
     fun getGameLevel(): Int
     fun setGameLevel(value: Int)
+    fun getMoveTime(): Int
+    fun setMoveTime(value: Int)
+    fun isCalMoveTime(): Boolean
+    fun onCalcMoveTime()
 }

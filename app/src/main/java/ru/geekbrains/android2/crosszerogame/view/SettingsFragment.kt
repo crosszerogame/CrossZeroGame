@@ -74,7 +74,8 @@ class SettingsFragment : Fragment() {
             settings = SettingsImpl(requireContext()),
             strings = SettingsStrings(
                 fieldSizeFormat = getString(R.string.field_size),
-                gameLevelFormat = getString(R.string.game_level)
+                gameLevelFormat = getString(R.string.game_level),
+                moveTimeFormat = getString(R.string.move_time)
             )
         )
     }
@@ -86,6 +87,8 @@ class SettingsFragment : Fragment() {
             SettingsState.UnavailableNick -> showNick(false)
             is SettingsState.Games -> showGames(state.games)
             is SettingsState.Error -> showError(state.error)
+            is SettingsState.MoveTime ->
+                binding?.containerRemoteLaunch?.sbTime?.progress = state.time
         }
     }
 
@@ -115,6 +118,8 @@ class SettingsFragment : Fragment() {
                 btnSecond.isChecked = true
             sbFieldsize.progress = state.fieldSize
             sbLevel.progress = state.gameLevel
+            sbTime.progress = state.moveTime
+            cbCalcTime.isChecked = model.isCalcMoveTime
         }
         containerRemoteConnect.etNick.setText(state.nick)
         containerRemoteConnect.etNick.setSelection(state.nick.length)
@@ -186,6 +191,7 @@ class SettingsFragment : Fragment() {
         adapter = GameAdapter(
             strings = GameStrings(
                 fieldSizeFormat = getString(R.string.field_size),
+                moveTimeFormat = getString(R.string.move_time),
                 waitCrossPlayer = getString(R.string.wait_cross),
                 waitZeroPlayer = getString(R.string.wait_zero)
             )
@@ -212,6 +218,7 @@ class SettingsFragment : Fragment() {
         btnFirst.isChecked = true
         initFieldSize(sbFieldsize, tvFieldsize)
         initLevel()
+        initTime()
         initNickInput(tilNick, etNick)
         btnFirst.setOnClickListener {
             model.setFirst(true)
@@ -224,7 +231,8 @@ class SettingsFragment : Fragment() {
                 fieldSize = sbFieldsize.progress,
                 beginAsFirst = btnFirst.isChecked,
                 nick = etNick.text.toString(),
-                level = sbLevel.progress
+                level = sbLevel.progress,
+                time = sbTime.progress
             )
             requireActivity().onBackPressed()
         }
@@ -276,8 +284,8 @@ class SettingsFragment : Fragment() {
 
     private fun initLevel() = binding?.containerRemoteLaunch?.run {
         sbLevel.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, v: Int, b: Boolean) {
-                tvLevel.text = model.getGameLevelString(v)
+            override fun onProgressChanged(seekBar: SeekBar, value: Int, b: Boolean) {
+                tvLevel.text = model.getGameLevelString(value)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -286,10 +294,25 @@ class SettingsFragment : Fragment() {
         sbLevel.progress = DEFAULT_LEVEL
     }
 
+    private fun initTime() = binding?.containerRemoteLaunch?.run {
+        sbTime.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, value: Int, b: Boolean) {
+                tvTime.text = model.getMoveTimeString(value)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        })
+        cbCalcTime.setOnCheckedChangeListener { buttonView, isChecked ->
+            sbTime.visibility = if (isChecked) View.GONE else View.VISIBLE
+            model.switchCalcMoveTime(isChecked)
+        }
+    }
+
     private fun initFieldSize(sb: SeekBar, tv: TextView) {
         sb.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, v: Int, b: Boolean) {
-                tv.text = model.getFieldSizeString(v)
+            override fun onProgressChanged(seekBar: SeekBar, value: Int, b: Boolean) {
+                tv.text = model.getFieldSizeString(value)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}

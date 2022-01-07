@@ -7,7 +7,12 @@ sealed class GameParameters {
     ) : GameParameters()
 
     data class RemoteLaunch(
-        val fieldSize: Int, val chipsForWin: Int, val beginAsFirst: Boolean, val nick: String, val level: Int
+        val fieldSize: Int,
+        val chipsForWin: Int,
+        val beginAsFirst: Boolean,
+        val nick: String,
+        val level: Int,
+        val time: Int
     ) : GameParameters()
 
     data class RemoteConnect(

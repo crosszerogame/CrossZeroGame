@@ -21,9 +21,11 @@ class SettingsModel : ViewModel() {
     companion object {
         private const val SHIFT_SIZE = 3
         private const val SHIFT_LEVEL = 1
+        private const val SHIFT_TIME = 10
         private const val MIN_LENGTH_NICK = 3
         private const val MAX_LENGTH_NICK = 20
         private const val TIME_FOR_FILTER = 2000L
+        private const val DEFAULT_SEC_FOR_MOVE = 20
         private val DEFAULT_TAB = Tab.SINGLE
         private const val NICK_FORMAT = "^[\\w\\s]+\$"
     }
@@ -36,6 +38,10 @@ class SettingsModel : ViewModel() {
     val state: LiveData<SettingsState> = _state
     private var nickJob: Job? = null
     var tab: Tab = DEFAULT_TAB
+    private var fieldSize: Int = 0
+    var isCalcMoveTime: Boolean = false
+        private set
+    private var isLoad = true
 
     private val scope = CoroutineScope(
         Dispatchers.Default
@@ -53,15 +59,29 @@ class SettingsModel : ViewModel() {
     fun init(settings: Settings, strings: SettingsStrings) {
         this.settings = settings
         this.strings = strings
+        fieldSize = settings.getFieldSize()
+
+        val time = if (settings.isCalMoveTime()) {
+            isCalcMoveTime = true
+            calcMoveTime() - SHIFT_TIME
+        } else {
+            isCalcMoveTime = false
+            settings.getMoveTime()
+        }
+
         _state.postValue(
             SettingsState.Settings(
                 beginAsFirst = settings.getBeginAsFirst(),
-                fieldSize = settings.getFieldSize(),
+                fieldSize = fieldSize,
                 nick = settings.getNick(),
-                gameLevel = settings.getGameLevel()
+                gameLevel = settings.getGameLevel(),
+                moveTime = time
             )
         )
     }
+
+    private fun calcMoveTime(): Int =
+        DEFAULT_SEC_FOR_MOVE + fieldSize * 3
 
     override fun onCleared() {
         scope.cancel()
@@ -73,16 +93,30 @@ class SettingsModel : ViewModel() {
     }
 
     fun getFieldSizeString(value: Int): String {
-        settings.setFieldSize(value)
+        if (!isLoad)
+            settings.setFieldSize(value)
+        fieldSize = value
+        if (!isLoad && isCalcMoveTime)
+            _state.postValue(SettingsState.MoveTime(calcMoveTime()))
         val size = value + SHIFT_SIZE
         val chipsForWin = repository.getChipsForWin(size)
         return String.format(strings.fieldSizeFormat, size, size, chipsForWin)
     }
 
     fun getGameLevelString(value: Int): String {
-        settings.setGameLevel(value)
+        if (!isLoad)
+            settings.setGameLevel(value)
         val level = value + SHIFT_LEVEL
         return String.format(strings.gameLevelFormat, level)
+    }
+
+    fun getMoveTimeString(value: Int): String {
+        if (isLoad)
+            isLoad = false
+        else if (!isCalcMoveTime)
+            settings.setMoveTime(value)
+        val time = value + SHIFT_TIME
+        return String.format(strings.moveTimeFormat, time)
     }
 
     fun launchGame(fieldSize: Int, beginAsFirst: Boolean) {
@@ -92,7 +126,7 @@ class SettingsModel : ViewModel() {
     }
 
     fun launchGame(
-        fieldSize: Int, beginAsFirst: Boolean, nick: String, level: Int
+        fieldSize: Int, beginAsFirst: Boolean, nick: String, level: Int, time: Int
     ) {
         val chipsForWin = repository.getChipsForWin(fieldSize)
         GameModel.launchGame(
@@ -101,7 +135,8 @@ class SettingsModel : ViewModel() {
                 chipsForWin = chipsForWin,
                 beginAsFirst = beginAsFirst,
                 nick = nick,
-                level = level
+                level = level,
+                time = time + SHIFT_TIME
             )
         )
     }
@@ -141,5 +176,15 @@ class SettingsModel : ViewModel() {
 
     fun setFirst(value: Boolean) {
         settings.setBeginAsFirst(value)
+    }
+
+    fun switchCalcMoveTime(isOn: Boolean) {
+        isCalcMoveTime = isOn
+        val time = calcMoveTime()
+        if (isCalcMoveTime) {
+            settings.onCalcMoveTime()
+            _state.postValue(SettingsState.MoveTime(time))
+        } else
+            settings.setMoveTime(time - SHIFT_TIME)
     }
 }

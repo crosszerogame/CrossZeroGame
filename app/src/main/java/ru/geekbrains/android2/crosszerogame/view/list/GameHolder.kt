@@ -25,6 +25,7 @@ class GameHolder(
         tvWait.text = if (waitCross) strings.waitCrossPlayer else strings.waitZeroPlayer
         pbLevel.progress = game.level
         tvSize.text = String.format(strings.fieldSizeFormat, game.fieldSize, game.fieldSize, game.chipsForWin)
+        tvTime.text = String.format(strings.moveTimeFormat, game.moveTime)
         root.setOnClickListener {
             onItemClick(game.id)
         }

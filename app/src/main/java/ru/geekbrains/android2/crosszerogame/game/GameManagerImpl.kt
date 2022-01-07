@@ -65,6 +65,7 @@ class GameManagerImpl(private val repository: GameRepository) : GameManager {
             fieldSize = 3,
             chipsForWin = 3,
             level = 3,
+            moveTime = 30,
             playerCross = Player(
                 id = 1,
                 nick = "Nick1",
@@ -77,6 +78,7 @@ class GameManagerImpl(private val repository: GameRepository) : GameManager {
             fieldSize = 4,
             chipsForWin = 3,
             level = 4,
+            moveTime = 20,
             playerCross = null,
             playerZero = Player(
                 id = 2,
@@ -89,6 +91,7 @@ class GameManagerImpl(private val repository: GameRepository) : GameManager {
             fieldSize = 6,
             chipsForWin = 4,
             level = 2,
+            moveTime = 50,
             playerCross = null,
             playerZero = Player(
                 id = 3,
@@ -101,6 +104,7 @@ class GameManagerImpl(private val repository: GameRepository) : GameManager {
             fieldSize = 9,
             chipsForWin = 4,
             level = 1,
+            moveTime = 40,
             playerCross = Player(
                 id = 4,
                 nick = "Nick4Nick4Nick4Nick4",
