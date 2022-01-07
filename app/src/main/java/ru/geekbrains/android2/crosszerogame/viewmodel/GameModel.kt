@@ -35,6 +35,7 @@ class GameModel : ViewModel(), MoveTimer.Callback {
     private var isReady = false
     private var isPlayerMove = true
     private var isTimeout = false
+    private var isSingleGame = true
     private var timer = MoveTimer(this, DEFAULT_SEC_FOR_MOVE)
 
     private val scope = CoroutineScope(
@@ -53,17 +54,18 @@ class GameModel : ViewModel(), MoveTimer.Callback {
     private val parametersObserver = Observer<GameParameters> {
         timer.cancel()
         when (it) {
-            is GameParameters.SingleLaunch -> {
-                timer = MoveTimer(this, DEFAULT_SEC_FOR_MOVE + (it.fieldSize - DEFAULT_SIZE) * 3)
-                newGame(it.fieldSize, it.beginAsFirst)
-            }
-            is GameParameters.RemoteLaunch -> {
-                timer = MoveTimer(this, it.time)
-                TODO()
-            }
+            is GameParameters.SingleLaunch ->
+                newSingleGame(it.fieldSize, it.beginAsFirst)
+            is GameParameters.RemoteLaunch ->
+                newRemoteGame(it)
             is GameParameters.RemoteConnect ->
                 TODO()
         }
+    }
+
+    private fun newRemoteGame(parameters: GameParameters.RemoteLaunch) {
+        timer = MoveTimer(this, parameters.time)
+        TODO()
     }
 
     fun getCell(x: Int, y: Int) = when (manager.getCell(x, y)) {
@@ -90,20 +92,25 @@ class GameModel : ViewModel(), MoveTimer.Callback {
             is GameManager.State.Move -> parseMove(state)
             GameManager.State.Ready -> {
                 isReady = true
-                timer.run()
+                runTimer()
             }
             GameManager.State.WaitOpponent -> {
                 isPlayerMove = false
                 isReady = false
-                timer.run()
+                runTimer()
             }
             GameManager.State.AbortedGame -> {
                 timer.cancel()
                 this._state.postValue(GameState.AbortedGame)
             }
-            GameManager.State.Created -> newGame(DEFAULT_SIZE, DEFAULT_FIRST)
+            GameManager.State.Created -> newSingleGame(DEFAULT_SIZE, DEFAULT_FIRST)
             is GameManager.State.Error -> handleError(state.error)
         }
+    }
+
+    private fun runTimer() {
+        if (!isSingleGame)
+            timer.run()
     }
 
     private suspend fun parseMove(move: GameManager.State.Move) = move.run {
@@ -115,7 +122,7 @@ class GameModel : ViewModel(), MoveTimer.Callback {
         isReady = false
         when (result) {
             GameManager.Result.TURN_PLAYER -> {
-                timer.run()
+                runTimer()
                 isReady = true
             }
             GameManager.Result.WIN_PLAYER ->
@@ -126,7 +133,7 @@ class GameModel : ViewModel(), MoveTimer.Callback {
                 _state.postValue(GameState.DrawnGame)
             GameManager.Result.TURN_OPPONENT -> {
                 isPlayerMove = false
-                timer.run()
+                runTimer()
                 _state.postValue(GameState.WaitOpponent)
             }
             GameManager.Result.CANCEL ->
@@ -141,10 +148,11 @@ class GameModel : ViewModel(), MoveTimer.Callback {
         super.onCleared()
     }
 
-    private fun newGame(fieldSize: Int, beginAsFirst: Boolean) {
+    private fun newSingleGame(fieldSize: Int, beginAsFirst: Boolean) {
         timer.cancel()
         size = fieldSize
         isTimeout = false
+        isSingleGame = true
         _state.postValue(GameState.NewGame(fieldSize))
         scope.launch {
             manager.createSingleGame(fieldSize, beginAsFirst)
