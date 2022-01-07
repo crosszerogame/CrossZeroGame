@@ -17,5 +17,6 @@
         <item name="materialButtonStyle">@style/ButtonStyle</item>
         <item name="editTextStyle">@style/EditTextStyle</item>
         <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="checkboxStyle">@style/CheckBoxStyle</item>
     </style>
 </resources>
