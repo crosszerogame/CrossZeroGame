@@ -44,6 +44,11 @@ class GameModel : ViewModel() {
     @Inject
     lateinit var provideRepo: Repo
 
+    fun initKeys() {
+        //   provideRepo.updateGamerOnServer(Gamer())
+    }
+
+
     fun testRepo() {
         //  provideRepo.insertGamer(Gamer())
 
@@ -78,34 +83,40 @@ class GameModel : ViewModel() {
 //
 //        provideRepo.deleteTableFromServer("toDelete")
 
-        provideRepo.insertVariableOnServer("testName", "testName1 changed")
+        //  provideRepo.insertVariableOnServer("testName", "testName1 changed")
 
-        provideRepo.insertVariableOnServer("testName2", "testName2 changed")
-
-//        provideRepo.getVariablesFromServer()
-//            ?.findInBackground { objects, e ->
-//                val variableName = "vartestName"
-//                val varName = "var$variableName"
-//                if (e == null) {
-//                    for (i in 0 until objects.size) {
-//                        if (objects[i].get(varName) != null) {
-//                            println( "varValue = ${objects[i].get(varName)}"  )
-//                        } else {
-//                            Log.d("Status", "Not found")
-//                        }
-//                    }
-//                } else {
-//                    Log.d("Error", e.message!!)
-//                }
-//            }
-//
+        //  provideRepo.insertVariableOnServer("testName2", "testName2 changed")
 
 
-    //   provideRepo.deleteVariableFromServer("testName2")
+//        provideRepo.insertGamerToServer(
+//            Gamer()
+//        )
 
 
+        provideRepo.updateGamerOnServer(
+            Gamer()
+        )
+
+//        provideRepo.deleteGamerFromServer(
+//            Gamer()
+//        )
 
 
+        /*
+        provideRepo.getGamersFromServer()!!.findInBackground { objects, e ->
+            if (e == null) {
+                for (i in 0 until objects.size) {
+                    println(" nick : " + objects[i].getString("var_nikGamer"))
+                }
+            } else {
+                Log.d("Error", e.message!!)
+            }
+        }
+
+        */
+
+
+//        provideRepo.initKeyGamer()
 
     }
 

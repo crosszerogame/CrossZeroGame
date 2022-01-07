@@ -18,14 +18,14 @@ fun convertToGamerEntity(gamer: Gamer) =
         true
     )
 
-fun convertToGamer(gamerEntity: GamerEntity) =
-    Gamer(
-        gamerEntity.keyGamer.toInt(),
-        gamerEntity.nikGamer,
-        gamerEntity.gameFieldSize,
-        gamerEntity.levelGamer,
-        gamerEntity.chipImageId
-    )
+//fun convertToGamer(gamerEntity: GamerEntity) =
+//    Gamer(
+//        gamerEntity.keyGamer.toInt(),
+//        gamerEntity.nikGamer,
+//        gamerEntity.gameFieldSize,
+//        gamerEntity.levelGamer,
+//        gamerEntity.chipImageId
+//    )
 
 fun convertToGameEntity(game: Game) =
     GameEntity(

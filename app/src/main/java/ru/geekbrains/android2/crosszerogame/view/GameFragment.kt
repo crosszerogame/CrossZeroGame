@@ -36,6 +36,7 @@ class GameFragment : Fragment(), BackEvent {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        model.initKeys()
         return inflater.inflate(R.layout.fragment_game, container, false)
     }
 

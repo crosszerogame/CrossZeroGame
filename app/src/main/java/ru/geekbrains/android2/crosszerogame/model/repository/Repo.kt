@@ -1,6 +1,7 @@
 package ru.geekbrains.android2.crosszerogame.model.repository
 
 import android.util.Log
+import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
 import io.reactivex.rxjava3.core.Completable
@@ -17,147 +18,26 @@ import ru.geekbrains.android2.crosszerogame.model.localdb.GamerEntity
 class Repo(
     private val gameDao: GameDao,
     private val gamerDao: GamerDao
-) : ObjectOperations(), CrossZeroDB, ServerOperations {
+) : ObjectOperations(), ServerOperations {
 
-    private val columnName = "column"
+    override fun getGamersFromServer(): ParseQuery<ParseObject>? =
+        ParseQuery.getQuery(gamerClass)
 
-    override fun insertGamer(gamer: Gamer) {
-        val _gamer = convertToGamerEntity(gamer)
-        gamerDao.getAllGamers().subscribeOn(Schedulers.io())
-            .subscribe({ repos ->
-                println(repos)
-                if (!repos.contains(_gamer)) {
-                    Completable.fromRunnable {
-                        gamerDao.insertGamer(_gamer)
-                    }.subscribeOn(Schedulers.io()).subscribe()
-                    Log.d("${_gamer.nikGamer} status", "Added")
-                }
-            }, {
-                Log.d("Error: ", it.message!!)
-            })
-    }
-
-    override fun updateGamer(gamer: Gamer) {
-        val _gamer = convertToGamerEntity(gamer)
-        gamerDao.getGamerByKeyGamer(_gamer.keyGamer).subscribeOn(Schedulers.io())
-            .subscribe({ repos ->
-                println(repos)
-                if (repos != null) {
-                    Completable.fromRunnable {
-                        gamerDao.deleteGamer(repos)
-                    }.subscribeOn(Schedulers.io()).subscribe()
-                    Completable.fromRunnable {
-                        gamerDao.insertGamer(_gamer)
-                    }.subscribeOn(Schedulers.io()).subscribe()
-                    Log.d("${_gamer.nikGamer} status", "Updated")
-                }
-            }, {
-                Log.d("Error: ", it.message!!)
-            })
-    }
-
-    override fun deleteGamer(gamer: Gamer) {
-        val _gamer = convertToGamerEntity(gamer)
-        gamerDao.getAllGamers().subscribeOn(Schedulers.io())
-            .subscribe({ repos ->
-                println(repos)
-                if (repos.contains(_gamer)) {
-                    Completable.fromRunnable {
-                        gamerDao.deleteGamer(_gamer)
-                    }.subscribeOn(Schedulers.io()).subscribe()
-                    Log.d("${_gamer.nikGamer} status", "Added")
-                }
-            }, {
-                Log.d("Error: ", it.message!!)
-            })
-    }
-
-    override fun deleteAllGamers() {
-        Completable.fromRunnable {
-            gamerDao.deleteAllGamers()
-        }.subscribeOn(Schedulers.io()).subscribe()
-    }
-
-    override fun getGamer(key: String): Single<GamerEntity> =
-        gamerDao.getGamerByKeyGamer(key)
-
-    override fun getListOfGamers(): Single<List<GamerEntity>> =
-        gamerDao.getAllGamers()
-
-    override fun insertGame(game: Game) {
-        val _game = convertToGameEntity(game)
-        gameDao.getAllGames().subscribeOn(Schedulers.io())
-            .subscribe({ repos ->
-                println(repos)
-                if (!repos.contains(_game)) {
-                    Completable.fromRunnable {
-                        gameDao.insertGame(_game)
-                    }.subscribeOn(Schedulers.io()).subscribe()
-                    Log.d("status", "Added")
-                }
-            }, {
-                Log.d("Error: ", it.message!!)
-            })
-    }
-
-    override fun updateGame(game: Game) {
-        val _game = convertToGameEntity(game)
-        gameDao.getGameByKeyGame(_game.keyGame).subscribeOn(Schedulers.io())
-            .subscribe({ repos ->
-                if (repos != null) {
-                    Completable.fromRunnable {
-                        gameDao.deleteGame(repos)
-                    }.subscribeOn(Schedulers.io()).subscribe()
-                    Completable.fromRunnable {
-                        gameDao.insertGame(_game)
-                    }.subscribeOn(Schedulers.io()).subscribe()
-                    Log.d("status", "Updated")
-                }
-            }, {
-                Log.d("Error: ", it.message!!)
-            })
-    }
-
-    override fun deleteGame(game: Game) {
-
-        val _game = convertToGameEntity(game)
-
-        gameDao.getAllGames().subscribeOn(Schedulers.io())
-            .subscribe({ repos ->
-                println(repos)
-                if (repos.contains(_game)) {
-                    Completable.fromRunnable {
-                        gameDao.deleteGame(_game)
-                    }.subscribeOn(Schedulers.io()).subscribe()
-                    Log.d(" status", "Added")
-                }
-            }, {
-                Log.d("Error: ", it.message!!)
-            })
-
-    }
-
-    override fun deleteAllGames() {
-        gameDao.deleteAllGames()
-    }
-
-    override fun getGame(key: String): Single<GameEntity> =
-        gameDao.getGameByKeyGame(key)
-
-    override fun getListOfGames(): Single<List<GameEntity>> =
-        gameDao.getAllGames()
-
-    override fun insertVariableOnServer(variableName: String, variableValue: String) {
-        val varName = "var$variableName"
-        val query = ParseQuery.getQuery<ParseObject>(variablesClass)
+    override fun insertGamerToServer(gamer: Gamer) {
+        val list = mutableListOf<String>()
+        val query = ParseQuery.getQuery<ParseObject>(gamerClass)
         query.orderByDescending("createdAt")
         query.findInBackground { objects, e ->
             if (e == null) {
-                val id = getVariableId(objects, varName)
-                if (id != "id") {
-                    updateObject(variablesClass, id, varName, variableValue)
-                } else {
-                    createObject(variablesClass, varName, variableValue)
+                for (i in 0 until objects.size) {
+                    list.add(objects[i].get("var_nikGamer").toString())
+                }
+                for (i in 0 until list.size) {
+                    println("list i : ${list[i]}, ${gamer.nikGamer}")
+                }
+                if (!list.contains(gamer.nikGamer)) {
+                    insertGamerServer(gamer)
+                    println("Insert")
                 }
             } else {
                 Log.d("Error", e.message!!)
@@ -165,29 +45,30 @@ class Repo(
         }
     }
 
-    override fun getVariablesFromServer(): ParseQuery<ParseObject>? =
-        ParseQuery.getQuery<ParseObject>(variablesClass)
-
-    /*
-    query.orderByDescending("createdAt")
-    query.findInBackground { objects, e ->
-        if (e == null) {
-
-        } else {
-            Log.d("Error", e.message!!)
-        }
-    }
-    */
-
-    override fun deleteVariableFromServer(variableName: String) {
-        val varName = "var$variableName"
-        val query = ParseQuery.getQuery<ParseObject>(varName)
+    override fun initKeyGamer() {
+        val list = mutableListOf<Gamer>()
+        val query = ParseQuery.getQuery<ParseObject>(gamerClass)
         query.orderByDescending("createdAt")
         query.findInBackground { objects, e ->
             if (e == null) {
-                val id = getVariableId(objects, varName)
-                if (id != "id") {
-                    deleteObject(variablesClass, id)
+                for (i in 0 until objects.size) {
+                    list.add(
+                        Gamer(
+                            objects[i].objectId,
+                            objects[i].getString("var_nikGamer")!!,
+                            objects[i].getNumber("var_gameFieldSize")!!.toInt(),
+                            objects[i].getNumber("var_levelGamer")!!.toInt(),
+                            objects[i].getNumber("var_chipImageId")!!.toInt(),
+                            objects[i].getNumber("var_timeForTurn")!!.toInt(),
+                            objects[i].getString("var_keyOpponent")!!,
+                            objects[i].getString("var_keyGame")!!,
+                            objects[i].getBoolean("var_isOnLine")
+                        )
+                    )
+                }
+                println("list ${list}")
+                for (i in 0 until list.size) {
+                    updateGamerOnServer(list[i])
                 }
             } else {
                 Log.d("Error", e.message!!)
@@ -195,70 +76,135 @@ class Repo(
         }
     }
 
-    override fun insertTableToServer(tableName: String, list: List<ListData>) {
-        val firstObject = ParseObject(tableName)
-        for (i in list.indices) {
-            firstObject.put(list[i].columnName, list[i].data)
-            firstObject.saveInBackground {
-                if (it != null) {
-                    it.localizedMessage?.let { message -> Log.e("MainActivity", message) }
+    override fun updateGamerOnServer(gamer: Gamer) {
+        if (gamer.keyGamer != "") {
+            val query = ParseQuery.getQuery<ParseObject>(gamerClass)
+            query.getInBackground(
+                gamer.keyGamer
+            ) { firstObject: ParseObject, e: ParseException? ->
+                if (e == null) {
+                    firstObject.put("var_keyGamer", gamer.keyGamer)
+                    firstObject.put("var_nikGamer", gamer.nikGamer)
+                    firstObject.put("var_gameFieldSize", gamer.gameFieldSize)
+                    firstObject.put("var_levelGamer", gamer.levelGamer)
+                    firstObject.put("var_chipImageId", gamer.chipImageId)
+                    firstObject.put("var_timeForTurn", gamer.timeForTurn)
+                    firstObject.put("var_keyOpponent", gamer.keyOpponent)
+                    firstObject.put("var_keyGame", gamer.keyGame)
+                    firstObject.put("var_isOnLine", gamer.isOnLine)
+
+                    firstObject.put("var_spareVariable1", gamer.spareVariable1)
+                    firstObject.put("var_spareVariable2", gamer.spareVariable2)
+                    firstObject.put("var_spareVariable3", gamer.spareVariable3)
+
+                    firstObject.saveInBackground {
+                        if (it != null) {
+                            it.localizedMessage?.let { message -> Log.e("MainActivity", message) }
+                            it.printStackTrace()
+                        } else {
+                            Log.d("MainActivity", "Object updated")
+                        }
+                    }
+
                 } else {
-                    Log.d("MainActivity", "Object saved.")
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            val query = ParseQuery.getQuery<ParseObject>(gamerClass)
+            query.orderByDescending("createdAt")
+            query.findInBackground { objects, e ->
+                if (e == null) {
+                    for (i in 0 until objects.size) {
+                        println("find nick to update: ${objects[i].get("var_nikGamer")}, my nick : ${gamer.nikGamer}")
+                        if (objects[i].get("var_nikGamer").toString() == gamer.nikGamer) {
+                            println("found id: ${objects[i].objectId}")
+                            val query = ParseQuery.getQuery<ParseObject>(gamerClass)
+                            query.getInBackground(
+                                objects[i].objectId
+                            ) { firstObject: ParseObject, e: ParseException? ->
+                                if (e == null) {
+
+                                    println("e == null")
+
+                                    firstObject.put("var_keyGamer", gamer.keyGamer)
+                                    firstObject.put("var_nikGamer", gamer.nikGamer)
+                                    firstObject.put("var_gameFieldSize", gamer.gameFieldSize)
+                                    firstObject.put("var_levelGamer", gamer.levelGamer)
+                                    firstObject.put("var_chipImageId", gamer.chipImageId)
+                                    firstObject.put("var_timeForTurn", gamer.timeForTurn)
+                                    firstObject.put("var_keyOpponent", gamer.keyOpponent)
+                                    firstObject.put("var_keyGame", gamer.keyGame)
+                                    firstObject.put("var_isOnLine", gamer.isOnLine)
+
+                                    println("gamer.spareVariable1: ${gamer.spareVariable1}")
+
+                                    firstObject.put("var_spareVariable1", gamer.spareVariable1)
+                                    firstObject.put("var_spareVariable2", gamer.spareVariable2)
+                                    firstObject.put("var_spareVariable3", gamer.spareVariable3)
+
+                                    firstObject.saveInBackground {
+                                        if (it != null) {
+                                            it.localizedMessage?.let { message -> Log.e("MainActivity", message) }
+                                            it.printStackTrace()
+                                        } else {
+                                            Log.d("MainActivity", "Object updated")
+                                        }
+                                    }
+
+                                } else {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Log.d("Error", e.message!!)
                 }
             }
         }
     }
 
-    override fun updateTableOnServer(tableName: String, list: List<ListData>) {
-        deleteTableFromServer(tableName)
-        insertTableToServer(tableName, list)
-    }
 
-    override fun deleteTableFromServer(tableName: String) {
-        val firstObject = ParseObject(tableName)
-        firstObject.deleteInBackground {
-            if (it == null) {
-                Log.d("Status", "Deleted")
-            } else {
-                Log.d("Error", it.message!!)
+    override fun deleteGamerFromServer(gamer: Gamer) {
+        if (gamer.keyGamer != "") {
+            val query = ParseQuery.getQuery<ParseObject>(gamerClass)
+            query.getInBackground(
+                gamer.keyGamer
+            ) { firstObject: ParseObject, e: ParseException? ->
+                if (e == null) {
+                    firstObject.deleteInBackground()
+                    Log.d("$firstObject status", "Deleted")
+                } else {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            val query = ParseQuery.getQuery<ParseObject>(gamerClass)
+            query.orderByDescending("createdAt")
+            query.findInBackground { objects, e ->
+                if (e == null) {
+                    for (i in 0 until objects.size) {
+                        if (objects[i].get("var_nikGamer").toString() == gamer.nikGamer) {
+                            val query = ParseQuery.getQuery<ParseObject>(gamerClass)
+                            query.getInBackground(
+                                objects[i].objectId
+                            ) { firstObject: ParseObject, e: ParseException? ->
+                                if (e == null) {
+                                    firstObject.deleteInBackground()
+                                    Log.d("$firstObject status", "Deleted")
+                                } else {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Log.d("Error", e.message!!)
+                }
             }
         }
     }
-
-    override fun getTableFromServer(tableName: String): ParseQuery<ParseObject>? =
-        ParseQuery.getQuery<ParseObject>(tableName)
-
-    /*
-    query.orderByDescending("createdAt")
-    query.findInBackground { objects, e ->
-        if (e == null) {
-            // TODO как теперь отсюда данные передать в другой класс лучше???
-        } else {
-            Log.d("Error", e.message!!)
-        }
-    }
-    */
-
-    fun insertGamerToServer(gamer: Gamer) {
-        val _gamer = convertToGamerEntity(gamer)
-
-        insert(_gamer, "keyGamer", _gamer.keyGamer, ServerClasses.gamerClass)
-        insert(_gamer, "nikGamer", _gamer.nikGamer, ServerClasses.gamerClass)
-
-        insert(_gamer, "gameFieldSize", _gamer.gameFieldSize.toString(), ServerClasses.gamerClass)
-        insert(_gamer, "levelGamer", _gamer.levelGamer.toString(), ServerClasses.gamerClass)
-
-        insert(_gamer, "chipImageId", _gamer.chipImageId.toString(), ServerClasses.gamerClass)
-        insert(_gamer, "timeForTurn", _gamer.timeForTurn.toString(), ServerClasses.gamerClass)
-
-
-        insert(_gamer, "keyOpponent", _gamer.keyOpponent, ServerClasses.gamerClass)
-        insert(_gamer, "keyGame", _gamer.keyGame, ServerClasses.gamerClass)
-
-        insert(_gamer, "isOnLine", _gamer.isOnLine.toString(), ServerClasses.gamerClass)
-
-    }
-
 
 }
 
