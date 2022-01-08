@@ -11,14 +11,15 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
-import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.databinding.FragmentSettingsBinding
 import android.view.inputmethod.InputMethodManager
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.layout_remote_connector.*
+import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.structure.data.Game
+import ru.geekbrains.android2.crosszerogame.utils.BlinkAnimation
 import ru.geekbrains.android2.crosszerogame.utils.SettingsImpl
 import ru.geekbrains.android2.crosszerogame.view.list.GameAdapter
 import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings
@@ -39,6 +40,9 @@ class SettingsFragment : Fragment() {
     private var binding: FragmentSettingsBinding? = null
     private lateinit var adapter: GameAdapter
     private var isNoChange = true
+    private val anBlink: BlinkAnimation by lazy {
+        BlinkAnimation(requireContext())
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -128,12 +132,17 @@ class SettingsFragment : Fragment() {
     }
 
     private fun showNick(state: SettingsState.NewNick) = binding?.run {
+        containerRemoteConnect.pbNick.visibility = View.INVISIBLE
+        containerRemoteLaunch.pbNick.visibility = View.INVISIBLE
         isNoChange = true
-        containerRemoteConnect.etNick.setText(state.nick)
-        containerRemoteLaunch.etNick.setText(state.nick)
+        if (containerRemoteConnect.etNick.isFocused.not())
+            containerRemoteConnect.etNick.setText(state.nick)
+        if (containerRemoteLaunch.etNick.isFocused.not())
+            containerRemoteLaunch.etNick.setText(state.nick)
         isNoChange = false
         containerRemoteLaunch.btnCreate.isEnabled = state.isAvailable
         if (state.isAvailable) {
+            showNickOk()
             containerRemoteLaunch.tilNick.error = null
             containerRemoteConnect.tilNick.error = null
             if (containerRemoteConnect.pbLoad.visibility == View.GONE)
@@ -143,6 +152,14 @@ class SettingsFragment : Fragment() {
             containerRemoteConnect.tilNick.error = getString(R.string.unavailable_nick)
             containerRemoteConnect.vBlock.visibility = View.VISIBLE
         }
+    }
+
+    private fun showNickOk() = binding?.run {
+        val iv = if (btnRemoteLaunch.isChecked)
+            containerRemoteLaunch.ivOk
+        else
+            containerRemoteConnect.ivOk
+        anBlink.start(iv)
     }
 
     private fun showError(error: Throwable) = binding?.run {
@@ -262,6 +279,7 @@ class SettingsFragment : Fragment() {
         et.doOnTextChanged { text, _, _, _ ->
             if (isNoChange) return@doOnTextChanged
             til.error = null
+            showNickProgressBar()
             model.checkNick(text.toString())
         }
         et.setOnKeyListener(View.OnKeyListener { _, keyCode, _ ->
@@ -271,6 +289,11 @@ class SettingsFragment : Fragment() {
             }
             false
         })
+    }
+
+    private fun showNickProgressBar() = binding?.run {
+        containerRemoteLaunch.pbNick.visibility = View.VISIBLE
+        containerRemoteConnect.pbNick.visibility = View.VISIBLE
     }
 
     private fun hideKeyboard() {

@@ -25,6 +25,28 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <ProgressBar
+        android:id="@+id/pb_nick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="@dimen/normal_indent"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@id/til_nick"
+        app:layout_constraintTop_toTopOf="@id/til_nick" />
+
+    <ImageView
+        android:id="@+id/iv_ok"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/ic_ok"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@id/pb_nick"
+        app:layout_constraintEnd_toEndOf="@id/pb_nick"
+        app:layout_constraintStart_toStartOf="@id/pb_nick"
+        app:layout_constraintTop_toTopOf="@id/pb_nick" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_refresh"
         android:layout_width="50dp"
