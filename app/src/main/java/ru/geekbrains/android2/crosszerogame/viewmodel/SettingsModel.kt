@@ -156,20 +156,20 @@ class SettingsModel : ViewModel() {
     }
 
     fun checkNick(nick: String) {
-        //TODO проверить на сервере доступность ника через 2 секунды после запуска
-        settings.setNick(nick)
         nickJob?.cancel()
         nickJob = scope.launch {
             delay(TIME_FOR_FILTER)
             if (nick.length < MIN_LENGTH_NICK || nick.length > MAX_LENGTH_NICK)
-                _state.postValue(SettingsState.UnavailableNick)
+                _state.postValue(SettingsState.NewNick(nick, false))
             else {
                 val pattern = Pattern.compile(NICK_FORMAT)
                 val m = pattern.matcher(nick)
-                if (m.find())
-                    _state.postValue(SettingsState.AvailableNick)
-                else
-                    _state.postValue(SettingsState.UnavailableNick)
+                if (m.find()) {
+                    //TODO проверить на сервере доступность ника через 2 секунды после запуска
+                    _state.postValue(SettingsState.NewNick(nick, true))
+                    settings.setNick(nick)
+                } else
+                    _state.postValue(SettingsState.NewNick(nick, false))
             }
         }
     }

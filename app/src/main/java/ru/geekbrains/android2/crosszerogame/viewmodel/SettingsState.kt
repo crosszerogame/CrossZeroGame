@@ -12,8 +12,7 @@ sealed class SettingsState {
     ) : SettingsState()
 
     data class MoveTime(val time: Int) : SettingsState()
-    object AvailableNick : SettingsState()
-    object UnavailableNick : SettingsState()
+    data class NewNick(val nick: String, val isAvailable: Boolean) : SettingsState()
     data class Games(val games: List<Game>) : SettingsState()
     data class Error(val error: Throwable) : SettingsState()
 }

@@ -38,6 +38,7 @@ class SettingsFragment : Fragment() {
 
     private var binding: FragmentSettingsBinding? = null
     private lateinit var adapter: GameAdapter
+    private var isNoChange = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,8 +84,7 @@ class SettingsFragment : Fragment() {
     private fun parseState(state: SettingsState) {
         when (state) {
             is SettingsState.Settings -> loadSettings(state)
-            SettingsState.AvailableNick -> showNick(true)
-            SettingsState.UnavailableNick -> showNick(false)
+            is SettingsState.NewNick -> showNick(state)
             is SettingsState.Games -> showGames(state.games)
             is SettingsState.Error -> showError(state.error)
             is SettingsState.MoveTime ->
@@ -109,6 +109,7 @@ class SettingsFragment : Fragment() {
                 btnSecond.isChecked = true
             sbFieldsize.progress = state.fieldSize
         }
+        isNoChange = true
         with(containerRemoteLaunch) {
             etNick.setText(state.nick)
             etNick.setSelection(state.nick.length)
@@ -121,18 +122,18 @@ class SettingsFragment : Fragment() {
             sbTime.progress = state.moveTime
             cbCalcTime.isChecked = model.isCalcMoveTime
         }
-        containerRemoteConnect.etNick.setText(state.nick)
+        isNoChange = false
+        containerRemoteConnect.etNick.setText(state.nick) //is change, than run check nick
         containerRemoteConnect.etNick.setSelection(state.nick.length)
-        model.checkNick(state.nick)
     }
 
-    private fun showNick(isAvailable: Boolean) = binding?.run {
-        if (btnRemoteLaunch.isChecked)
-            containerRemoteConnect.etNick.text = containerRemoteLaunch.etNick.text
-        else
-            containerRemoteLaunch.etNick.text = containerRemoteConnect.etNick.text
-        containerRemoteLaunch.btnCreate.isEnabled = isAvailable
-        if (isAvailable) {
+    private fun showNick(state: SettingsState.NewNick) = binding?.run {
+        isNoChange = true
+        containerRemoteConnect.etNick.setText(state.nick)
+        containerRemoteLaunch.etNick.setText(state.nick)
+        isNoChange = false
+        containerRemoteLaunch.btnCreate.isEnabled = state.isAvailable
+        if (state.isAvailable) {
             containerRemoteLaunch.tilNick.error = null
             containerRemoteConnect.tilNick.error = null
             if (containerRemoteConnect.pbLoad.visibility == View.GONE)
@@ -165,6 +166,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setTab(tab: SettingsModel.Tab) = binding?.run {
+        hideKeyboard()
         model.tab = tab
         when (tab) {
             SettingsModel.Tab.SINGLE -> {
@@ -187,7 +189,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initRemoteConnect() = binding?.containerRemoteConnect?.run {
-        initNickInput(tilNick, etNick)
+        initNickInput(tilNick, etNick, false)
         adapter = GameAdapter(
             strings = GameStrings(
                 fieldSizeFormat = getString(R.string.field_size),
@@ -219,7 +221,7 @@ class SettingsFragment : Fragment() {
         initFieldSize(sbFieldsize, tvFieldsize)
         initLevel()
         initTime()
-        initNickInput(tilNick, etNick)
+        initNickInput(tilNick, etNick, true)
         btnFirst.setOnClickListener {
             model.setFirst(true)
         }
@@ -256,8 +258,9 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun initNickInput(til: TextInputLayout, et: EditText) {
+    private fun initNickInput(til: TextInputLayout, et: EditText, isLaunch: Boolean) {
         et.doOnTextChanged { text, _, _, _ ->
+            if (isNoChange) return@doOnTextChanged
             til.error = null
             model.checkNick(text.toString())
         }
