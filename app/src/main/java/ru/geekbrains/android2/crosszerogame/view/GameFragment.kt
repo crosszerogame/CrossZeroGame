@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import ru.geekbrains.android2.crosszerogame.App
 import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.view.list.FieldAdapter
 import ru.geekbrains.android2.crosszerogame.view.list.Linear
@@ -18,9 +19,13 @@ import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameState
 
 class GameFragment : Fragment(), BackEvent {
+
     private val model: GameModel by lazy {
-        ViewModelProvider(this).get(GameModel::class.java)
+        ViewModelProvider(this).get(GameModel::class.java).apply {
+            App.instance.appComponent.inject(this)
+        }
     }
+
     private lateinit var rvField: RecyclerView
     private lateinit var adapter: FieldAdapter
     private var modelIsInit = false
@@ -31,6 +36,7 @@ class GameFragment : Fragment(), BackEvent {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        model.initKeys()
         return inflater.inflate(R.layout.fragment_game, container, false)
     }
 
@@ -38,6 +44,7 @@ class GameFragment : Fragment(), BackEvent {
         super.onViewCreated(view, savedInstanceState)
         rvField = view.findViewById(R.id.rv_field) as RecyclerView
         initField()
+        model.testRepo()
     }
 
     private fun initField() {

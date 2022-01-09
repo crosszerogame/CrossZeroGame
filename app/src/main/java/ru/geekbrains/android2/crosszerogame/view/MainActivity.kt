@@ -24,6 +24,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         bottomSheet = BottomSheetBehavior.from(findViewById(R.id.bottom_container))
 
+
+
+
         if (savedInstanceState == null) {
             val fragmentTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
             val game = GameFragment()

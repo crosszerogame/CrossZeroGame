@@ -28,7 +28,7 @@ class ArtIntelligence {
     fun getGamer(keyGamer: Int = 1) = currentGamer
 
     fun gamersList() =
-        listOf(Gamer(keyGamer = 0, nikGamer = "Art Intelligence", gameFieldSize = SIZE))
+        listOf(Gamer(keyGamer = "0", nikGamer = "Art Intelligence", gameFieldSize = SIZE))
 
     fun game(
         keyOpponent: Int = 0,

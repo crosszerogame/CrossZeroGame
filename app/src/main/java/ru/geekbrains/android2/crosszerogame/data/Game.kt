@@ -1,5 +1,6 @@
 package ru.geekbrains.android2.crosszerogame.data
 
+import ru.geekbrains.android2.crosszerogame.data.GameConstants.MIN_TIME_FOR_TURN
 import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN1
 import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN1_SIZE1
 import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.DOTS_TO_WIN1_SIZE2
@@ -13,13 +14,19 @@ import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.MA
 import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence.Companion.MIN_FIELD_SIZE
 
 data class Game(
-    val gameFieldSize: Int = MIN_FIELD_SIZE,
+    var keyGame: String = "",
+    var gameFieldSize: Int = MIN_FIELD_SIZE,
     var gameField: Array<Array<CellField>> = Array(gameFieldSize) { Array(gameFieldSize) { CellField.EMPTY } },
     var motionXIndex: Int = -1,
     var motionYIndex: Int = -1,
     var gameStatus: GameStatus = GameStatus.NEW_GAME,
     var dotsToWin: Int = DOTS_TO_WIN1_SIZE1,
-    var turnOfGamer: Boolean = true
+    var turnOfGamer: Boolean = true,
+    var timeForTurn: Int = MIN_TIME_FOR_TURN,
+    var countOfTurn: Int = 0,
+    var spareVariable1: String = "spare1_updatedd",
+    var spareVariable2: String = "spare2_updatedd",
+    var spareVariable3: String = "spare3_updated"
 ) {
     init {
         if (motionXIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE

@@ -1,15 +1,24 @@
 package ru.geekbrains.android2.crosszerogame.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
+import com.google.gson.Gson
 import ru.geekbrains.android2.crosszerogame.data.CellField
 import ru.geekbrains.android2.crosszerogame.data.Game
 import ru.geekbrains.android2.crosszerogame.data.GameStatus
 import ru.geekbrains.android2.crosszerogame.data.Gamer
 import ru.geekbrains.android2.crosszerogame.data.ai.ArtIntelligence
+import ru.geekbrains.android2.crosszerogame.model.repository.Repo
 import ru.geekbrains.android2.crosszerogame.view.list.CellValue
+import javax.inject.Inject
+import io.reactivex.rxjava3.schedulers.Schedulers
+import org.json.JSONArray
+import org.json.JSONObject
+import ru.geekbrains.android2.crosszerogame.model.repository.ListData
+import ru.geekbrains.android2.crosszerogame.model.repository.convertToCellFieldMatrix
 
 class GameModel : ViewModel() {
     companion object {
@@ -34,6 +43,123 @@ class GameModel : ViewModel() {
         isFirst = it.beginAsFirst
         newGame()
     }
+
+
+    @Inject
+    lateinit var provideRepo: Repo
+
+    fun initKeys() {
+        //   provideRepo.updateGamerOnServer(Gamer())
+    }
+
+
+    fun testRepo() {
+
+        val list = listOf(
+            ListData("c1", "d1"),
+            ListData("c2", "d2"),
+            ListData("c3", "d3"),
+            ListData("c4", "d4")
+        )
+
+        var gameFieldSize = 3
+
+        var gameField: Array<Array<CellField>> =
+            Array(gameFieldSize) { Array(gameFieldSize) { CellField.EMPTY } }
+
+        println("gameField: ${gameField}")
+
+        var jsonStr = Gson().toJson(gameField)
+
+        println("jsonStr: $jsonStr")
+
+        convertToCellFieldMatrix(jsonStr)
+
+        //  provideRepo.insertGameToServer(Game())
+
+//        provideRepo.getGamesFromServer()!!.findInBackground { objects, e ->
+//            if (e == null) {
+//                for (i in 0 until objects.size) {
+//                    val matrix =  convertToCellFieldMatrix(objects[i].getString("var_gameField").toString())
+//                    println("matrix $matrix")
+//                    println(" gameField[$i]: " + objects[i].getString("var_gameField"))
+//                }
+//            } else {
+//                Log.d("Error", e.message!!)
+//            }
+//        }
+
+        provideRepo.deleteGameFromServer(
+            Game()
+        )
+
+
+        /*
+        var str = ""
+        for (i in 0 until gameField.size) {
+            for (j in 0 until gameField.size) {
+                str += if (i == 0 && j == 0) {
+                    "${gameField[i][j]}"
+                } else {
+                    ", ${gameField[i][j]}"
+                }
+                println("gameField[$i][$j]: ${gameField[i][j]}")
+            }
+        }
+        println("str: $str")
+        */
+
+        /*
+        enum class CellField {
+    GAMER, OPPONENT, EMPTY
+}
+         */
+
+
+//        provideRepo.insertVariableOnServer("Test", "changed")
+//        provideRepo.insertVariableOnServer("toDelete", "changed")
+
+//        provideRepo.deleteVariableFromServer("toDelete")
+//
+//        provideRepo.deleteTableFromServer("toDelete")
+
+        //  provideRepo.insertVariableOnServer("testName", "testName1 changed")
+
+        //  provideRepo.insertVariableOnServer("testName2", "testName2 changed")
+
+
+//        provideRepo.insertGamerToServer(
+//            Gamer()
+//        )
+
+
+//        provideRepo.updateGamerOnServer(
+//            Gamer()
+//        )
+
+//        provideRepo.deleteGamerFromServer(
+//            Gamer()
+//        )
+
+
+        /*
+        provideRepo.getGamersFromServer()!!.findInBackground { objects, e ->
+            if (e == null) {
+                for (i in 0 until objects.size) {
+                    println(" nick : " + objects[i].getString("var_nikGamer"))
+                }
+            } else {
+                Log.d("Error", e.message!!)
+            }
+        }
+
+        */
+
+
+//        provideRepo.initKeyGamer()
+
+    }
+
 
     fun getState(): LiveData<GameState> = state
 
