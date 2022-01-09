@@ -23,6 +23,151 @@ class Repo(
     override fun getGamersFromServer(): ParseQuery<ParseObject>? =
         ParseQuery.getQuery(gamerClass)
 
+    override fun getGamesFromServer(): ParseQuery<ParseObject>? =
+        ParseQuery.getQuery(gameClass)
+
+    override fun insertGameToServer(game: Game) {
+        insertGameServer(game)
+    }
+
+    override fun updateGameOnServer(game: Game) {
+        if (game.keyGame != "") {
+            val query = ParseQuery.getQuery<ParseObject>(gameClass)
+            query.getInBackground(
+                game.keyGame
+            ) { firstObject: ParseObject, e: ParseException? ->
+                if (e == null) {
+                    firstObject.put("var_keyGame", game.keyGame)
+                    firstObject.put("var_gameFieldSize", game.gameFieldSize)
+                    firstObject.put("var_gameField", convertToString(game.gameField))
+                    firstObject.put("var_motionXIndex", game.motionXIndex)
+                    firstObject.put("var_motionYIndex", game.motionYIndex)
+                    firstObject.put("var_gameStatus", convertToString(game.gameStatus))
+                    firstObject.put("var_dotsToWin", game.dotsToWin)
+                    firstObject.put("var_turnOfGamer", game.turnOfGamer)
+                    firstObject.put("var_timeForTurn", game.timeForTurn)
+                    firstObject.put("var_countOfTurn", game.countOfTurn)
+                    firstObject.put("var_spareVariable1", game.spareVariable1)
+                    firstObject.put("var_spareVariable2", game.spareVariable2)
+                    firstObject.put("var_spareVariable3", game.spareVariable3)
+
+                    firstObject.saveInBackground {
+                        if (it != null) {
+                            it.localizedMessage?.let { message -> Log.e("MainActivity", message) }
+                            it.printStackTrace()
+                        } else {
+                            Log.d("MainActivity", "Object updated")
+                        }
+                    }
+
+                } else {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            val query = ParseQuery.getQuery<ParseObject>(gameClass)
+            query.orderByDescending("createdAt")
+            query.findInBackground { objects, e ->
+                if (e == null) {
+                    for (i in 0 until objects.size) {
+                        if (objects[i].get("var_spareVariable3")
+                                .toString() == game.spareVariable3
+                        ) {
+                            println("found id: ${objects[i].objectId}")
+                            val query = ParseQuery.getQuery<ParseObject>(gameClass)
+                            query.getInBackground(
+                                objects[i].objectId
+                            ) { firstObject: ParseObject, e: ParseException? ->
+                                if (e == null) {
+                                    println("e == null")
+                                    firstObject.put("var_keyGame", game.keyGame)
+                                    firstObject.put("var_gameFieldSize", game.gameFieldSize)
+                                    firstObject.put(
+                                        "var_gameField",
+                                        convertToString(game.gameField)
+                                    )
+                                    firstObject.put("var_motionXIndex", game.motionXIndex)
+                                    firstObject.put("var_motionYIndex", game.motionYIndex)
+                                    firstObject.put(
+                                        "var_gameStatus",
+                                        convertToString(game.gameStatus)
+                                    )
+                                    firstObject.put("var_dotsToWin", game.dotsToWin)
+                                    firstObject.put("var_turnOfGamer", game.turnOfGamer)
+                                    firstObject.put("var_timeForTurn", game.timeForTurn)
+                                    firstObject.put("var_countOfTurn", game.countOfTurn)
+                                    firstObject.put("var_spareVariable1", game.spareVariable1)
+                                    firstObject.put("var_spareVariable2", game.spareVariable2)
+                                    firstObject.put("var_spareVariable3", game.spareVariable3)
+                                    firstObject.saveInBackground {
+                                        if (it != null) {
+                                            it.localizedMessage?.let { message ->
+                                                Log.e(
+                                                    "MainActivity",
+                                                    message
+                                                )
+                                            }
+                                            it.printStackTrace()
+                                        } else {
+                                            Log.d("MainActivity", "Object updated")
+                                        }
+                                    }
+
+                                } else {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Log.d("Error", e.message!!)
+                }
+            }
+        }
+    }
+
+    override fun deleteGameFromServer(game: Game) {
+        if (game.keyGame != "") {
+            val query = ParseQuery.getQuery<ParseObject>(gameClass)
+            query.getInBackground(
+                game.keyGame
+            ) { firstObject: ParseObject, e: ParseException? ->
+                if (e == null) {
+                    firstObject.deleteInBackground()
+                    Log.d("$firstObject status", "Deleted")
+                } else {
+                    e.printStackTrace()
+                }
+            }
+        } else {
+            val query = ParseQuery.getQuery<ParseObject>(gameClass)
+            query.orderByDescending("createdAt")
+            query.findInBackground { objects, e ->
+                if (e == null) {
+                    for (i in 0 until objects.size) {
+                        if (objects[i].get("var_spareVariable3")
+                                .toString() == game.spareVariable3
+                        ) {
+                            val query = ParseQuery.getQuery<ParseObject>(gameClass)
+                            query.getInBackground(
+                                objects[i].objectId
+                            ) { firstObject: ParseObject, e: ParseException? ->
+                                if (e == null) {
+                                    firstObject.deleteInBackground()
+                                    Log.d("$firstObject status", "Deleted")
+                                } else {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Log.d("Error", e.message!!)
+                }
+            }
+        }
+    }
+
     override fun insertGamerToServer(gamer: Gamer) {
         val list = mutableListOf<String>()
         val query = ParseQuery.getQuery<ParseObject>(gamerClass)
@@ -43,6 +188,10 @@ class Repo(
                 Log.d("Error", e.message!!)
             }
         }
+    }
+
+    override fun initKeyGame() {
+        // TODO
     }
 
     override fun initKeyGamer() {
@@ -145,7 +294,12 @@ class Repo(
 
                                     firstObject.saveInBackground {
                                         if (it != null) {
-                                            it.localizedMessage?.let { message -> Log.e("MainActivity", message) }
+                                            it.localizedMessage?.let { message ->
+                                                Log.e(
+                                                    "MainActivity",
+                                                    message
+                                                )
+                                            }
                                             it.printStackTrace()
                                         } else {
                                             Log.d("MainActivity", "Object updated")

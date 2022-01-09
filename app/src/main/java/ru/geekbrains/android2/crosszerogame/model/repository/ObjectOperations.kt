@@ -4,6 +4,7 @@ import android.util.Log
 import com.parse.ParseException
 import com.parse.ParseObject
 import com.parse.ParseQuery
+import ru.geekbrains.android2.crosszerogame.data.Game
 import ru.geekbrains.android2.crosszerogame.data.Gamer
 import ru.geekbrains.android2.crosszerogame.model.localdb.GamerEntity
 
@@ -34,6 +35,32 @@ open class ObjectOperations {
                 obj.saveInBackground()
             } else {
                 e.printStackTrace()
+            }
+        }
+    }
+
+    fun insertGameServer(game: Game){
+        println("insertGamerServer start")
+        val firstObject = ParseObject(gameClass)
+        firstObject.put("var_keyGame", game.keyGame)
+        firstObject.put("var_gameFieldSize", game.gameFieldSize)
+        firstObject.put("var_gameField", convertToString(game.gameField))
+        firstObject.put("var_motionXIndex", game.motionXIndex)
+        firstObject.put("var_motionYIndex", game.motionYIndex)
+        firstObject.put("var_gameStatus", convertToString(game.gameStatus))
+        firstObject.put("var_dotsToWin", game.dotsToWin)
+        firstObject.put("var_turnOfGamer", game.turnOfGamer)
+        firstObject.put("var_timeForTurn", game.timeForTurn)
+        firstObject.put("var_countOfTurn", game.countOfTurn)
+        firstObject.put("var_spareVariable1", game.spareVariable1)
+        firstObject.put("var_spareVariable2", game.spareVariable2)
+        firstObject.put("var_spareVariable3", game.spareVariable3)
+        firstObject.saveInBackground {
+            if (it != null) {
+                it.localizedMessage?.let { message -> Log.e("MainActivity", message) }
+                it.printStackTrace()
+            } else {
+                Log.d("MainActivity", "Object saved.")
             }
         }
     }
