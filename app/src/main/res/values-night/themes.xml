@@ -2,18 +2,19 @@
     <!-- Base application theme. -->
     <style name="Theme.CrossZeroGame" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#444</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimary">#015F57</item>
+        <item name="colorPrimaryVariant">#00302C</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorSecondary">#03A9F4</item>
+        <item name="colorSecondaryVariant">#015A82</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
         <item name="actionBarStyle">@style/Widget.MaterialComponents.ActionBar.Primary</item>
-        <item name="text_color">@color/white</item>
         <item name="translucent_bg">@color/translucent_black</item>
+        <item name="materialButtonStyle">@style/ButtonStyle</item>
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
     </style>
 </resources>
