@@ -146,7 +146,7 @@ class GameModel : ViewModel() {
             var gm: Game? = null
             var attempt = 1
             //почему-то с первой попытки не всегда проходит
-            while (gm == null || attempt <= GameConstants.MAX_ATTEMPTS_PUT_DATA_TO_SERVER) {
+            while (gm == null && attempt <= GameConstants.MAX_ATTEMPTS_PUT_DATA_TO_SERVER) {
                 //направляем выбранному оппоненту запрос на игру
                 gm = gr.setOpponent(
                     key = params.keyOpponent,
