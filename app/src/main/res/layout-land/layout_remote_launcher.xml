@@ -25,6 +25,28 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <ProgressBar
+        android:id="@+id/pb_nick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="@dimen/normal_indent"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@id/til_nick"
+        app:layout_constraintTop_toTopOf="@id/til_nick" />
+
+    <ImageView
+        android:id="@+id/iv_ok"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/ic_ok"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@id/pb_nick"
+        app:layout_constraintEnd_toEndOf="@id/pb_nick"
+        app:layout_constraintStart_toStartOf="@id/pb_nick"
+        app:layout_constraintTop_toTopOf="@id/pb_nick" />
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_begin_as"
         android:layout_width="wrap_content"
@@ -64,7 +86,7 @@
 
     <LinearLayout
         android:id="@+id/l_level"
-        android:layout_width="match_parent"
+        android:layout_width="190dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/big_indent"
         android:background="@drawable/field_with_border"
@@ -78,6 +100,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/big_indent"
+            android:layout_marginEnd="@dimen/big_indent"
             android:padding="@dimen/normal_indent" />
 
         <SeekBar
@@ -91,20 +114,23 @@
 
     <LinearLayout
         android:id="@+id/l_fieldsize"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/normal_indent"
         android:layout_marginTop="@dimen/big_indent"
         android:background="@drawable/field_with_border"
         android:orientation="vertical"
         android:padding="@dimen/normal_indent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/l_level">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/l_level"
+        app:layout_constraintTop_toBottomOf="@id/til_nick">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tv_fieldsize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/big_indent"
+            android:layout_marginEnd="@dimen/big_indent"
             android:padding="@dimen/normal_indent" />
 
         <SeekBar
@@ -116,6 +142,47 @@
             android:progress="1" />
     </LinearLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/l_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/big_indent"
+        android:background="@drawable/field_with_border"
+        android:orientation="vertical"
+        android:padding="@dimen/normal_indent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/l_fieldsize">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tv_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/big_indent"
+            android:padding="@dimen/normal_indent"
+            app:layout_constraintEnd_toStartOf="@id/cb_calc_time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/cb_calc_time"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:text="@string/calc"
+            app:layout_constraintBottom_toBottomOf="@id/tv_time"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <SeekBar
+            android:id="@+id/sb_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/normal_indent"
+            android:max="110"
+            android:progress="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_time" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_create"
         android:layout_width="wrap_content"
@@ -123,6 +190,6 @@
         android:enabled="false"
         android:text="@string/create"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/l_fieldsize" />
+        app:layout_constraintTop_toBottomOf="@id/l_time" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

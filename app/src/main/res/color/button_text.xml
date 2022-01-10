@@ -5,4 +5,3 @@
     <item android:state_enabled="true" android:color="?attr/colorPrimary" android:alpha="1"/>
     <item android:color="?attr/colorOnSurface" android:alpha="0.38"/>
 </selector>
-

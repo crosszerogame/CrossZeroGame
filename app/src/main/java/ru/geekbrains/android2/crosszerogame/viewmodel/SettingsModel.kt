@@ -18,13 +18,14 @@ class SettingsModel : ViewModel() {
     companion object {
         private const val SHIFT_SIZE = 3
         private const val SHIFT_LEVEL = 1
+        private const val SHIFT_TIME = 10
         private const val MIN_LENGTH_NICK = 3
         private const val MAX_LENGTH_NICK = 20
         private const val TIME_FOR_FILTER = 2000L
+        private const val DEFAULT_SEC_FOR_MOVE = 20
         private val DEFAULT_TAB = Tab.SINGLE
         private const val NICK_FORMAT = "^[\\w\\s]+\$"
     }
-
 
     private lateinit var strings: SettingsStrings
     private lateinit var settings: Settings
@@ -32,6 +33,10 @@ class SettingsModel : ViewModel() {
     val state: LiveData<SettingsState> = _state
     private var nickJob: Job? = null
     var tab: Tab = DEFAULT_TAB
+    private var fieldSize: Int = 0
+    var isCalcMoveTime: Boolean = false
+        private set
+    private var isLoad = true
 
     private val scope = CoroutineScope(
         Dispatchers.Default
@@ -49,15 +54,29 @@ class SettingsModel : ViewModel() {
     fun init(settings: Settings, strings: SettingsStrings) {
         this.settings = settings
         this.strings = strings
+        fieldSize = settings.getFieldSize()
+
+        val time = if (settings.isCalMoveTime()) {
+            isCalcMoveTime = true
+            calcMoveTime() - SHIFT_TIME
+        } else {
+            isCalcMoveTime = false
+            settings.getMoveTime()
+        }
+
         _state.postValue(
             SettingsState.Settings(
                 beginAsFirst = settings.getBeginAsFirst(),
-                fieldSize = settings.getFieldSize(),
+                fieldSize = fieldSize,
                 nick = settings.getNick(),
-                gameLevel = settings.getGameLevel()
+                gameLevel = settings.getGameLevel(),
+                moveTime = time
             )
         )
     }
+
+    private fun calcMoveTime(): Int =
+        DEFAULT_SEC_FOR_MOVE + fieldSize * 3
 
     override fun onCleared() {
         scope.cancel()
@@ -69,15 +88,30 @@ class SettingsModel : ViewModel() {
     }
 
     fun getFieldSizeString(value: Int): String {
-        settings.setFieldSize(value)
+        if (!isLoad)
+            settings.setFieldSize(value)
+        fieldSize = value
+        if (!isLoad && isCalcMoveTime)
+            _state.postValue(SettingsState.MoveTime(calcMoveTime()))
         val size = value + SHIFT_SIZE
-        return String.format(strings.fieldSizeFormat, size, size, App.grAi.dotsToWin(size).second)
+        val chipsForWin = App.grAi.dotsToWin(size).second
+        return String.format(strings.fieldSizeFormat, size, size, chipsForWin)
     }
 
     fun getGameLevelString(value: Int): String {
-        settings.setGameLevel(value)
+        if (!isLoad)
+            settings.setGameLevel(value)
         val level = value + SHIFT_LEVEL
         return String.format(strings.gameLevelFormat, level)
+    }
+
+    fun getMoveTimeString(value: Int): String {
+        if (isLoad)
+            isLoad = false
+        else if (!isCalcMoveTime)
+            settings.setMoveTime(value)
+        val time = value + SHIFT_TIME
+        return String.format(strings.moveTimeFormat, time)
     }
 
     fun launchGame(fieldSize: Int, beginAsFirst: Boolean) {
@@ -87,15 +121,20 @@ class SettingsModel : ViewModel() {
     }
 
     fun launchGame(
-        fieldSize: Int, nick: String, level: Int
+        nick: String,
+        waitZero: Boolean,
+        fieldSize: Int,
+        level: Int,
+        moveTime: Int
     ) {
-
         GameModel.launchGame(
-            GameParameters.GetOpponent(
+            GameParameters.RemoteLaunch(
+                nick = nick,
+                waitZero = waitZero,
                 fieldSize = fieldSize + SHIFT_SIZE,
                 chipsForWin = App.grAi.dotsToWin(fieldSize).second,
-                nick = nick,
-                level = level
+                level = level + SHIFT_LEVEL,
+                moveTime = moveTime + SHIFT_TIME
             )
         )
     }
@@ -107,7 +146,7 @@ class SettingsModel : ViewModel() {
         levelOpponent: Int
     ) {
         GameModel.launchGame(
-            GameParameters.SetOpponent(
+            GameParameters.RemoteConnect(
                 keyOpponent = keyOpponent,
                 beginAsFirst = beginAsFirst,
                 nikOpponent = nikOpponent,
@@ -123,25 +162,35 @@ class SettingsModel : ViewModel() {
     }
 
     fun checkNick(nick: String) {
-        //TODO проверить на сервере доступность ника через 2 секунды после запуска
-        settings.setNick(nick)
         nickJob?.cancel()
         nickJob = scope.launch {
             delay(TIME_FOR_FILTER)
             if (nick.length < MIN_LENGTH_NICK || nick.length > MAX_LENGTH_NICK)
-                _state.postValue(SettingsState.UnavailableNick)
+                _state.postValue(SettingsState.NewNick(nick, false))
             else {
                 val pattern = Pattern.compile(NICK_FORMAT)
                 val m = pattern.matcher(nick)
-                if (m.find())
-                    _state.postValue(SettingsState.AvailableNick)
-                else
-                    _state.postValue(SettingsState.UnavailableNick)
+                if (m.find()) {
+                    //TODO проверить на сервере доступность ника через 2 секунды после запуска
+                    _state.postValue(SettingsState.NewNick(nick, true))
+                    settings.setNick(nick)
+                } else
+                    _state.postValue(SettingsState.NewNick(nick, false))
             }
         }
     }
 
     fun setFirst(value: Boolean) {
         settings.setBeginAsFirst(value)
+    }
+
+    fun switchCalcMoveTime(isOn: Boolean) {
+        isCalcMoveTime = isOn
+        val time = calcMoveTime()
+        if (isCalcMoveTime) {
+            settings.onCalcMoveTime()
+            _state.postValue(SettingsState.MoveTime(time))
+        } else
+            settings.setMoveTime(time - SHIFT_TIME)
     }
 }

@@ -1,11 +1,15 @@
 package ru.geekbrains.android2.crosszerogame.utils
 
+import android.content.res.Resources
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
 
@@ -50,4 +54,18 @@ fun Snackbar.addAction(
     //extraView.setOnClickListener {this.dispatchDismiss(BaseCallback.DISMISS_EVENT_ACTION); aListener?.onClick(it)}
     button.setOnClickListener { this.dismiss(); aListener?.onClick(it) }
     return this
+}
+
+fun Fragment.setSubtitle(value: String) {
+    if (activity == null)
+        return
+    val act = activity as AppCompatActivity
+    act.supportActionBar?.subtitle = value
+}
+
+fun Fragment.getTextColor(): Int {
+    val typedValue = TypedValue()
+    val theme: Resources.Theme = requireContext().theme
+    theme.resolveAttribute(R.attr.colorOnSecondary, typedValue, true)
+    return typedValue.data
 }

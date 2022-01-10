@@ -5,11 +5,16 @@ sealed class GameParameters {
         val fieldSize: Int, val beginAsFirst: Boolean
     ) : GameParameters()
 
-    data class GetOpponent(
-        val fieldSize: Int, val chipsForWin: Int, val nick: String, val level: Int
+    data class RemoteLaunch(
+        val nick: String,
+        val waitZero: Boolean,
+        val fieldSize: Int,
+        val chipsForWin: Int,
+        val level: Int,
+        val moveTime: Int
     ) : GameParameters()
 
-    data class SetOpponent(
+    data class RemoteConnect(
         val keyOpponent: String,
         val beginAsFirst: Boolean,
         val nikOpponent: String,

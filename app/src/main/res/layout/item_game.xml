@@ -42,7 +42,7 @@
             android:layout_marginBottom="@dimen/normal_indent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_nick"
-            tools:text="" />
+            tools:text="@string/wait_zero" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tv_size"
@@ -51,6 +51,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_wait"
             tools:text="@string/field_size" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_size"
+            tools:text="@string/move_time" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

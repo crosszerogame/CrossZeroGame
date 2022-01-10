@@ -3,4 +3,3 @@
     <item android:state_enabled="true" android:color="?attr/colorSecondary"/>
     <item android:state_enabled="false" android:color="?attr/colorSecondaryVariant"/>
 </selector>
-

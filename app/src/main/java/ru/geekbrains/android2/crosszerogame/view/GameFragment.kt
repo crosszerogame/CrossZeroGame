@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.utils.addAction
+import ru.geekbrains.android2.crosszerogame.utils.getTextColor
+import ru.geekbrains.android2.crosszerogame.utils.setSubtitle
 import ru.geekbrains.android2.crosszerogame.view.list.FieldAdapter
 import ru.geekbrains.android2.crosszerogame.view.list.Linear
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
@@ -28,6 +30,7 @@ class GameFragment : Fragment(), BackEvent {
 
     private var messageBar: Snackbar? = null
     var onMessageAction: (() -> Unit)? = null
+    var onHideBottom: (() -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,7 +48,6 @@ class GameFragment : Fragment(), BackEvent {
             changeGameState(it)
         }
         model.init()
-
     }
 
     private fun initField() {
@@ -65,7 +67,6 @@ class GameFragment : Fragment(), BackEvent {
             override fun onFinish() {
                 resizeField(model.fieldSize)
                 restoreField()
-                model.readyField()
                 rvField.visibility = View.VISIBLE
             }
         }.start()
@@ -92,6 +93,7 @@ class GameFragment : Fragment(), BackEvent {
             cellSize = countCellSize(linear, fieldSize),
             linear = linear
         ) { x, y ->
+            onHideBottom?.invoke()
             model.doMove(x, y)
         }
         rvField.adapter = adapter
@@ -117,9 +119,8 @@ class GameFragment : Fragment(), BackEvent {
     }
 
     private fun restoreField() {
-        val size = model.fieldSize
-        for (x in 0 until size) {
-            for (y in 0 until size) {
+        for (x in 0 until model.fieldSize) {
+            for (y in 0 until model.fieldSize) {
                 adapter.setCell(x, y, model.getCell(x, y))
             }
         }
@@ -128,41 +129,51 @@ class GameFragment : Fragment(), BackEvent {
 
     private fun changeGameState(state: GameState) {
         dismissMessage()
+        setSubtitle("")
         when (state) {
-            is GameState.MoveOpponent -> {
+            is GameState.PasteChip -> {
                 if (adapter.linear == Linear.HORIZONTAL)
                     rvField.smoothScrollToPosition(state.x)
                 else
                     rvField.smoothScrollToPosition(state.y)
                 doMove(state.x, state.y, state.isCross)
             }
-            is GameState.MoveGamer -> {
-                doMove(state.x, state.y, state.isCross)
-            }
             is GameState.NewGame -> {
-                if (state.remoteOpponent) {
+                if (state.isRemoteOpponent) {
                     showMessageNewGame(opponentStr(state))
                 } else initField()
             }
-            GameState.WinGamer -> showMessage(R.string.win_player)
+            GameState.WinGamer -> showMessage(R.string.win_gamer)
             GameState.WinOpponent -> showMessage(R.string.win_opponent)
             GameState.DrawnGame -> showMessage(R.string.drawn)
             GameState.AbortedGame -> showMessage(R.string.aborted_game)
-            GameState.WaitOpponent -> showMessage(R.string.wait_opponent, false)
+            GameState.WaitOpponent -> setSubtitle(getString(R.string.wait_opponent))
+            is GameState.TimeOpponent -> setSubtitle(
+                String.format(
+                    getString(R.string.time_opponent),
+                    state.sec
+                )
+            )
+            is GameState.TimePlayer -> setSubtitle(
+                String.format(
+                    getString(R.string.time_gamer),
+                    state.sec
+                )
+            )
+            GameState.Timeout -> showMessage(R.string.timeout)
         }
     }
 
-    private fun showMessage(stringId: Int, withAction: Boolean = true) {
+    private fun showMessage(stringId: Int) {
         messageBar = Snackbar.make(rvField, stringId, Snackbar.LENGTH_INDEFINITE)
-        if (withAction)
-            messageBar?.setAction(android.R.string.ok) {
-                model.repeatGame()
-                dismissMessage()
-            }?.addAction(R.layout.snackbar_extra_button, android.R.string.cancel) {
+        messageBar?.run {
+            setActionTextColor(getTextColor())
+            setAction(android.R.string.ok) {
                 onMessageAction?.invoke()
                 dismissMessage()
             }
-        messageBar?.show()
+            show()
+        }
     }
 
     private fun showMessageNewGame(stringMsg: String, withAction: Boolean = true) {
@@ -186,7 +197,6 @@ class GameFragment : Fragment(), BackEvent {
             state.fieldSize.toString(),
             state.levelOpponent.toString()
         )
-
 
     private fun dismissMessage() {
         messageBar?.let {
