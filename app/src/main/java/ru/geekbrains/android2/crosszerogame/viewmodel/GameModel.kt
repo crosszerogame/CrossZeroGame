@@ -36,11 +36,11 @@ class GameModel : ViewModel(), MoveTimer.Callback {
     val fieldSize: Int
         get() = size
     private var isReady = false
-    private var isPlayerMove = true
     private var isTimeout = false
     private var isFirst: Boolean = DEFAULT_FIRST
     private var isRemoteOpponent = false
     private var timer = MoveTimer(this, DEFAULT_SEC_FOR_MOVE)
+    private var timeForTurn = DEFAULT_SEC_FOR_MOVE
 
     private val scope = CoroutineScope(
         Dispatchers.Default
@@ -60,13 +60,10 @@ class GameModel : ViewModel(), MoveTimer.Callback {
         scope.launch {
             when (it) {
                 is GameParameters.SingleLaunch -> {
-                    size = it.fieldSize
-                    isFirst = it.beginAsFirst
                     isRemoteOpponent = false
-                    newGameAi()
+                    doLaunchSingle(it.fieldSize, it.beginAsFirst)
                 }
                 is GameParameters.RemoteLaunch -> {
-                    size = it.fieldSize
                     isRemoteOpponent = true
                     doLaunchRemote(it)
                 }
@@ -78,10 +75,14 @@ class GameModel : ViewModel(), MoveTimer.Callback {
         }
     }
 
-    fun getCell(x: Int, y: Int) = when (game.gameField[y][x]) {
-        GameConstants.CellField.GAMER -> if (isFirst) CellValue.CROSS else CellValue.ZERO
-        GameConstants.CellField.OPPONENT -> if (isFirst) CellValue.ZERO else CellValue.CROSS
-        GameConstants.CellField.EMPTY -> CellValue.EMPTY
+    fun getCell(x: Int, y: Int): CellValue {
+        if (x >= game.gameField.size || y >= game.gameField.size)
+            return CellValue.EMPTY
+        return when (game.gameField[y][x]) {
+            GameConstants.CellField.GAMER -> if (isFirst) CellValue.CROSS else CellValue.ZERO
+            GameConstants.CellField.OPPONENT -> if (isFirst) CellValue.ZERO else CellValue.CROSS
+            GameConstants.CellField.EMPTY -> CellValue.EMPTY
+        }
     }
 
     fun init() {
@@ -89,16 +90,20 @@ class GameModel : ViewModel(), MoveTimer.Callback {
         scope.launch {
             if (!isRemoteOpponent) {
                 if (game.gameStatus == GameConstants.GameStatus.NEW_GAME)
-                    newGameAi()
+                    doLaunchSingle(DEFAULT_SIZE, DEFAULT_FIRST)
                 else
-                    postState()
+                    postState(game)
             }
         }
     }
 
-    private fun runTimer() {
-        if (isRemoteOpponent)
-            timer.run()
+    fun runTimer() {
+        if (!isRemoteOpponent) return
+
+        if (timer.secForMove != timeForTurn)
+            timer = MoveTimer(this, timeForTurn)
+
+        timer.run()
     }
 
     override fun onCleared() {
@@ -108,16 +113,12 @@ class GameModel : ViewModel(), MoveTimer.Callback {
         super.onCleared()
     }
 
-    private suspend fun newGameAi() {
-        _state.postValue(
-            GameState.NewGame(
-                isRemoteOpponent = false,
-                fieldSize = size,
-                opponentIsFirst = !isFirst
-            )
-        )
+    private suspend fun doLaunchSingle(fieldSize: Int, beginAsFirst: Boolean) {
+        isFirst = beginAsFirst
+        size = fieldSize
+        _state.postValue(GameState.NewGame(false))
         gamer = grAi.gamer(
-            gameFieldSize = size,
+            gameFieldSize = fieldSize,
             nikGamer = "Gamer"
         )
         game = grAi.game(
@@ -126,17 +127,26 @@ class GameModel : ViewModel(), MoveTimer.Callback {
             else
                 GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT
         )
+        isReady = true
     }
 
     private suspend fun doLaunchRemote(params: GameParameters.RemoteLaunch) {
-        _state.postValue(GameState.WaitOpponent)
+        isReady = false
+        size = params.fieldSize
+        timeForTurn = params.timeForTurn
+        isFirst = params.waitZero
+        game = Game(
+            gameFieldSize = size,
+            timeForTurn = timeForTurn
+        )
+        _state.postValue(GameState.NewGame(true))
         //регистрируем геймера, если есть, то обновляем
         gamer = gr.gamer(
-            chipImageId = if(params.waitZero) 0 else 1,
+            chipImageId = if (params.waitZero) 0 else 1,
             nikGamer = params.nick,
             gameFieldSize = params.fieldSize,
             levelGamer = params.level,
-            timeForTurn = params.moveTime
+            timeForTurn = params.timeForTurn
         )
         // очищаем предыдущих оппонентов
         gr.setOpponent(
@@ -145,29 +155,25 @@ class GameModel : ViewModel(), MoveTimer.Callback {
         //ожидаем появления предложения на игру и принимаем предложение
         gr.flowGetOpponent().collect {
             opponent = it.first
-            game = it.second
-            size = game.gameFieldSize
-            isFirst = game.turnOfGamer
-            _state.value = GameState.NewGame(
-                isRemoteOpponent = true,
-                fieldSize = size,
-                nikOpponent = opponent.nikGamer,
-                levelOpponent = opponent.levelGamer,
-                opponentIsFirst = !isFirst
-            )
+            //game = it.second
+            // isFirst = game.turnOfGamer
+            isReady = true
+            _state.postValue(GameState.NewOpponent(opponent.nikGamer))
+            delay(DELAY_TIME)
 
             gr.flowGame(
                 motionXIndex = -1,
                 motionYIndex = -1,
                 gameStatus = GameConstants.GameStatus.GAME_IS_ON
             ).collect {
-                game = it
-                postState()
+                postState(it)
             }
         }
     }
 
     private suspend fun doConnect(params: GameParameters.RemoteConnect) {
+        isReady = false
+        _state.postValue(GameState.WaitOpponent)
         gamer.keyOpponent = params.keyOpponent
         var gm: Game? = null
         var attempt = 1
@@ -186,99 +192,89 @@ class GameModel : ViewModel(), MoveTimer.Callback {
         }
 
         gm?.let {
-            game = gm
+            game = it
             size = game.gameFieldSize
             isFirst = game.turnOfGamer
+            timeForTurn = game.timeForTurn
             //    val opponent = gr.getOpponent()
             //       opponent?.let {
-            _state.value = GameState.NewGame(
-                isRemoteOpponent = true,
-                fieldSize = size,
-                nikOpponent = params.nikOpponent,
-                levelOpponent = params.levelOpponent,
-                opponentIsFirst = !isFirst
-            )
+            _state.postValue(GameState.NewGame(false))
+            delay(DELAY_TIME)
+
             gr.flowGame(
                 motionXIndex = -1,
                 motionYIndex = -1,
                 gameStatus = GameConstants.GameStatus.GAME_IS_ON
             ).collect {
-                game = it
-                postState()
+                postState(it)
             }
             //      }
         }
     }
 
     fun doMove(x: Int, y: Int) {
-        if (game.gameStatus == GameConstants.GameStatus.GAME_IS_ON) {
-            _state.value = GameState.PasteChip(x, y, isFirst)
-
-            scope.launch {
-                if (isRemoteOpponent)
-                    gr.flowGame(
-                        motionXIndex = x,
-                        motionYIndex = y,
-                        gameStatus = GameConstants.GameStatus.GAME_IS_ON
-                    ).collect {
-                        game = it
-                        postState()
-                    }
-                else
-                    grAi.flowGame(
-                        motionXIndex = x,
-                        motionYIndex = y,
-                        gameStatus = GameConstants.GameStatus.GAME_IS_ON
-                    ).collect {
-                        game = it
-                        postState()
-                    }
-            }
-        }
-    }
-
-    fun repeatGame() {
+        if (!isReady || game.gameStatus != GameConstants.GameStatus.GAME_IS_ON)
+            return
+        _state.postValue(GameState.PasteChip(x, y, isFirst, GameState.Result.CONTINUE))
+        isReady = false
         scope.launch {
-            if (isRemoteOpponent) {
-                //    TODO()
-            } else {
-                newGameAi()
+            val g = if (isRemoteOpponent) gr else {
+                delay(DELAY_TIME)
+                grAi
+            }
+            g.flowGame(
+                motionXIndex = x,
+                motionYIndex = y,
+                gameStatus = GameConstants.GameStatus.GAME_IS_ON
+            ).collect {
+                postState(it)
             }
         }
     }
 
     fun abortGame() {
         //   TODO()
+        _state.postValue(GameState.AbortedGame)
     }
 
-    private suspend fun postState() {
-        if (game.gameStatus != GameConstants.GameStatus.ABORTED_GAME) {
-            timer.cancel()
-            doOpponentMove()
-            delay(DELAY_TIME)
-        }
+    private fun postState(game: Game) {
+        timer.cancel()
+        if (game.gameStatus != GameConstants.GameStatus.GAME_IS_ON)
+            isReady = false
         when (game.gameStatus) {
-//            GameConstants.GameStatus.GAME_IS_ON ->
-//                if (game.turnOfGamer) doOpponentMove()
+            GameConstants.GameStatus.GAME_IS_ON -> {
+                if (game.turnOfGamer)
+                    doOpponentMove(game.motionXIndex, game.motionYIndex, GameState.Result.CONTINUE)
+                else
+                    runTimer()
+            }
             GameConstants.GameStatus.WIN_GAMER ->
                 _state.postValue(GameState.WinGamer)
             GameConstants.GameStatus.WIN_OPPONENT ->
-                _state.postValue(GameState.WinOpponent)
-            GameConstants.GameStatus.DRAWN_GAME ->
-                _state.postValue(GameState.DrawnGame)
+                doOpponentMove(game.motionXIndex, game.motionYIndex, GameState.Result.WIN)
+            GameConstants.GameStatus.DRAWN_GAME -> {
+                if (game.turnOfGamer)
+                    doOpponentMove(game.motionXIndex, game.motionYIndex, GameState.Result.DRAWN)
+                else
+                    _state.postValue(GameState.DrawnGame)
+            }
             GameConstants.GameStatus.ABORTED_GAME ->
                 _state.postValue(GameState.AbortedGame)
+            else ->
+                isReady = true
         }
+        this.game = game
     }
 
-    private fun doOpponentMove() {
-        if (game.motionXIndex > -1)
-            _state.postValue(GameState.PasteChip(game.motionXIndex, game.motionYIndex, !isFirst))
+    private fun doOpponentMove(x: Int, y: Int, result: GameState.Result) {
+        if (x == -1 || y == -1) return
+        _state.postValue(GameState.PasteChip(x, y, !isFirst, result))
+        isReady = true
     }
 
     override fun onTime(sec: Int) {
-        if (isPlayerMove)
-            _state.postValue(GameState.TimePlayer(sec))
+        if (game.turnOfGamer)
+            _state.postValue(GameState.TimeGamer(sec))
         else
             _state.postValue(GameState.TimeOpponent(sec))
     }

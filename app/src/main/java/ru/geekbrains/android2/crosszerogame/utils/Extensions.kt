@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
+import ru.geekbrains.android2.crosszerogame.data.Gamer
 
 /**
  * Adds an extra action button to this snackbar.
@@ -69,3 +70,5 @@ fun Fragment.getTextColor(): Int {
     theme.resolveAttribute(R.attr.colorOnSecondary, typedValue, true)
     return typedValue.data
 }
+
+fun Gamer.isCross() = chipImageId == 0

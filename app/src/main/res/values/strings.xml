@@ -24,9 +24,7 @@
     <string name="wait_zero">Ожидается игрок за Нолики</string>
     <string name="time_gamer">На ваш ход %d сек</string>
     <string name="time_opponent">На ход оппонента %d сек</string>
+    <string name="connect_opponent">Подключился игрок %s</string>
     <string name="timeout">Время вышло</string>
     <string name="calc">Расчитать</string>
-    <string name="opponent_info">Противник %s за %s размер поля %s уровень %s</string>
-    <string name="cross">крестики</string>
-    <string name="zero">нолики</string>
 </resources>

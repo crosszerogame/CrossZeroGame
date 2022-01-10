@@ -12,14 +12,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
-import ru.geekbrains.android2.crosszerogame.utils.addAction
 import ru.geekbrains.android2.crosszerogame.utils.getTextColor
 import ru.geekbrains.android2.crosszerogame.utils.setSubtitle
 import ru.geekbrains.android2.crosszerogame.view.list.FieldAdapter
 import ru.geekbrains.android2.crosszerogame.view.list.Linear
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameState
-import java.util.*
 
 class GameFragment : Fragment(), BackEvent {
     private val model: GameModel by lazy {
@@ -73,6 +71,7 @@ class GameFragment : Fragment(), BackEvent {
     }
 
     private fun resizeField(fieldSize: Int) {
+        println("resizeField: $fieldSize")
         val linear = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
             Linear.HORIZONTAL
         else
@@ -137,14 +136,18 @@ class GameFragment : Fragment(), BackEvent {
                 else
                     rvField.smoothScrollToPosition(state.y)
                 doMove(state.x, state.y, state.isCross)
+                when (state.result) {
+                    GameState.Result.CONTINUE -> model.runTimer()
+                    GameState.Result.WIN -> showMessage(R.string.win_opponent)
+                    GameState.Result.DRAWN -> showMessage(R.string.drawn)
+                }
             }
             is GameState.NewGame -> {
-                if (state.isRemoteOpponent) {
-                    showMessageNewGame(opponentStr(state))
-                } else initField()
+                if (state.isWait)
+                    setSubtitle(getString(R.string.wait_opponent))
+                initField()
             }
             GameState.WinGamer -> showMessage(R.string.win_gamer)
-            GameState.WinOpponent -> showMessage(R.string.win_opponent)
             GameState.DrawnGame -> showMessage(R.string.drawn)
             GameState.AbortedGame -> showMessage(R.string.aborted_game)
             GameState.WaitOpponent -> setSubtitle(getString(R.string.wait_opponent))
@@ -154,13 +157,21 @@ class GameFragment : Fragment(), BackEvent {
                     state.sec
                 )
             )
-            is GameState.TimePlayer -> setSubtitle(
+            is GameState.TimeGamer -> setSubtitle(
                 String.format(
                     getString(R.string.time_gamer),
                     state.sec
                 )
             )
             GameState.Timeout -> showMessage(R.string.timeout)
+            is GameState.NewOpponent -> {
+                model.runTimer()
+                val msg = String.format(
+                    getString(R.string.connect_opponent),
+                    state.nick
+                )
+                Snackbar.make(rvField, msg, Snackbar.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -175,28 +186,6 @@ class GameFragment : Fragment(), BackEvent {
             show()
         }
     }
-
-    private fun showMessageNewGame(stringMsg: String, withAction: Boolean = true) {
-        messageBar = Snackbar.make(rvField, stringMsg, Snackbar.LENGTH_INDEFINITE)
-        if (withAction)
-            messageBar?.setAction(android.R.string.ok) {
-                initField()
-                dismissMessage()
-            }?.addAction(R.layout.snackbar_extra_button, android.R.string.cancel) {
-                model.abortGame()
-                dismissMessage()
-            }
-        messageBar?.show()
-    }
-
-    private fun opponentStr(state: GameState.NewGame) =
-        String.format(
-            Locale.getDefault(), getString(R.string.opponent_info),
-            state.nikOpponent,
-            if (state.opponentIsFirst) getString(R.string.cross) else getString(R.string.zero),
-            state.fieldSize.toString(),
-            state.levelOpponent.toString()
-        )
 
     private fun dismissMessage() {
         messageBar?.let {

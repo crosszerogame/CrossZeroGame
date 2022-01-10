@@ -11,7 +11,7 @@ sealed class GameParameters {
         val fieldSize: Int,
         val chipsForWin: Int,
         val level: Int,
-        val moveTime: Int
+        val timeForTurn: Int
     ) : GameParameters()
 
     data class RemoteConnect(
