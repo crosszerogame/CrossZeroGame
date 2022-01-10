@@ -16,22 +16,27 @@ class AI() {
 
     fun initGame(gameFieldSize: Int): Pair<Int, Int> {
         SIZE = gameFieldSize
-        val pair = dotsToWin(SIZE)
-        map = Array(pair.first) { Array(pair.first) { DOT_EMPTY } }
+        val pair = dotsToWin(gameFieldSize)
+        map = Array(SIZE) { Array(SIZE) { DOT_EMPTY } }
+        DOTS_TO_WIN = pair.second
 
         return Pair(SIZE, DOTS_TO_WIN)
     }
 
     fun dotsToWin(gameFieldSize: Int): Pair<Int, Int> {
-        when (gameFieldSize) {
-            in GameConstants.DOTS_TO_WIN1_SIZE1..GameConstants.DOTS_TO_WIN1_SIZE2 -> DOTS_TO_WIN =
-                GameConstants.DOTS_TO_WIN1
-            in GameConstants.DOTS_TO_WIN2_SIZE1..GameConstants.DOTS_TO_WIN2_SIZE2 -> DOTS_TO_WIN =
+        var size = gameFieldSize
+        val dotsToWin = when (gameFieldSize) {
+            in GameConstants.DOTS_TO_WIN2_SIZE1..GameConstants.DOTS_TO_WIN2_SIZE2 ->
                 GameConstants.DOTS_TO_WIN2
-            in GameConstants.DOTS_TO_WIN3_SIZE1..GameConstants.DOTS_TO_WIN3_SIZE2 -> DOTS_TO_WIN =
+            in GameConstants.DOTS_TO_WIN3_SIZE1..GameConstants.DOTS_TO_WIN3_SIZE2 ->
                 GameConstants.DOTS_TO_WIN3
+            else -> //in GameConstants.DOTS_TO_WIN1_SIZE1..GameConstants.DOTS_TO_WIN1_SIZE2 ->
+            {
+                size = GameConstants.DOTS_TO_WIN1_SIZE1
+                GameConstants.DOTS_TO_WIN1
+            }
         }
-        return Pair(gameFieldSize, DOTS_TO_WIN)
+        return Pair(size, dotsToWin)
     }
 
     fun humanTurn(motionXIndex: Int, motionYIndex: Int, turnOfGamer: Boolean): Boolean {
