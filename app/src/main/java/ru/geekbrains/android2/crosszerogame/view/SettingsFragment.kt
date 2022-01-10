@@ -20,6 +20,7 @@ import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.data.Gamer
 import ru.geekbrains.android2.crosszerogame.utils.BlinkAnimation
 import ru.geekbrains.android2.crosszerogame.utils.SettingsImpl
+import ru.geekbrains.android2.crosszerogame.utils.isCross
 import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings
 import ru.geekbrains.android2.crosszerogame.utils.strings.SettingsStrings
 import ru.geekbrains.android2.crosszerogame.view.list.OpponentsAdapter
@@ -210,13 +211,13 @@ class SettingsFragment : Fragment() {
             strings = GameStrings(
                 fieldSizeFormat = getString(R.string.field_size),
                 moveTimeFormat = getString(R.string.move_time),
-                waitCrossPlayer = getString(R.string.wait_cross),
-                waitZeroPlayer = getString(R.string.wait_zero)
+                waitCross = getString(R.string.wait_cross),
+                waitZero = getString(R.string.wait_zero)
             )
         ) { opponent ->
             model.launchGame(
                 keyOpponent = opponent.keyGamer,
-                beginAsFirst = false, //TODO btnFirst.isChecked,
+                beginAsFirst = !opponent.isCross(),
                 nikOpponent = opponent.nikGamer,
                 levelOpponent = opponent.levelGamer
             )
@@ -255,7 +256,7 @@ class SettingsFragment : Fragment() {
                 waitZero = btnFirst.isChecked,
                 fieldSize = sbFieldsize.progress,
                 level = sbLevel.progress,
-                moveTime = sbTime.progress
+                timeForTurn = sbTime.progress
             )
             requireActivity().onBackPressed()
         }

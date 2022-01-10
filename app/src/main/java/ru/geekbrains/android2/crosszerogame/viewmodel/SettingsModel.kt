@@ -125,7 +125,7 @@ class SettingsModel : ViewModel() {
         waitZero: Boolean,
         fieldSize: Int,
         level: Int,
-        moveTime: Int
+        timeForTurn: Int
     ) {
         GameModel.launchGame(
             GameParameters.RemoteLaunch(
@@ -134,7 +134,7 @@ class SettingsModel : ViewModel() {
                 fieldSize = fieldSize + SHIFT_SIZE,
                 chipsForWin = App.grAi.dotsToWin(fieldSize).second,
                 level = level + SHIFT_LEVEL,
-                moveTime = moveTime + SHIFT_TIME
+                timeForTurn = timeForTurn + SHIFT_TIME
             )
         )
     }
