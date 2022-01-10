@@ -15,18 +15,15 @@ class AI() {
     private var map = Array(SIZE) { Array(SIZE) { DOT_EMPTY } }
 
     fun initGame(gameFieldSize: Int): Pair<Int, Int> {
-        val pair = dotsToWin(gameFieldSize)
+        SIZE = gameFieldSize
+        val pair = dotsToWin(SIZE)
         map = Array(pair.first) { Array(pair.first) { DOT_EMPTY } }
 
         return Pair(SIZE, DOTS_TO_WIN)
     }
 
     fun dotsToWin(gameFieldSize: Int): Pair<Int, Int> {
-        SIZE =
-            if (gameFieldSize > GameConstants.MAX_FIELD_SIZE || gameFieldSize < GameConstants.MIN_FIELD_SIZE) GameConstants.MIN_FIELD_SIZE
-            else gameFieldSize
-
-        when (SIZE) {
+        when (gameFieldSize) {
             in GameConstants.DOTS_TO_WIN1_SIZE1..GameConstants.DOTS_TO_WIN1_SIZE2 -> DOTS_TO_WIN =
                 GameConstants.DOTS_TO_WIN1
             in GameConstants.DOTS_TO_WIN2_SIZE1..GameConstants.DOTS_TO_WIN2_SIZE2 -> DOTS_TO_WIN =
@@ -34,7 +31,7 @@ class AI() {
             in GameConstants.DOTS_TO_WIN3_SIZE1..GameConstants.DOTS_TO_WIN3_SIZE2 -> DOTS_TO_WIN =
                 GameConstants.DOTS_TO_WIN3
         }
-        return Pair(SIZE, DOTS_TO_WIN)
+        return Pair(gameFieldSize, DOTS_TO_WIN)
     }
 
     fun humanTurn(motionXIndex: Int, motionYIndex: Int, turnOfGamer: Boolean): Boolean {
