@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="translucent_bg" format="color" />
+    <dimen name="games_list_height">181dp</dimen>
 </resources>
