@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 	<color name="ic_launcher_background">#FFFFFF</color>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="translucent_white">#DDDDDDDD</color>
     <color name="translucent_black">#DD333333</color>
+
+    <color name="slideBackgroundColor">#003d7e</color>
+    <color name="orange">#FF6D00</color>
+
+    <!-- Active and passive indicators colors  -->
+    <color name="colorActiveIndicator">#2962FF</color>
+    <color name="colorPassiveIndcator">#662962FF</color>
+
 </resources>
