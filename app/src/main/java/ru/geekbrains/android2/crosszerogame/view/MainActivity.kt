@@ -16,6 +16,8 @@ class MainActivity : AppCompatActivity() {
         private const val TAG_GAME = "game"
     }
 
+    private var savedInstanceState: Bundle? = null
+
     private lateinit var bottomSheet: BottomSheetBehavior<FrameLayout>
     private val showBottom = {
         bottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
@@ -27,6 +29,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        this.savedInstanceState = savedInstanceState
+        openInfoFragment(savedInstanceState)
+    }
+
+    private fun openInfoFragment(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.container, InfoFragment.newInstance())
+                .commitNow()
+        }
+    }
+
+    fun openMainProject() {
         bottomSheet = BottomSheetBehavior.from(findViewById(R.id.bottom_container))
 
         if (savedInstanceState == null) {

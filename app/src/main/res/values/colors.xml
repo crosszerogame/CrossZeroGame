@@ -5,4 +5,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="translucent_white">#DDDDDDDD</color>
     <color name="translucent_black">#DD333333</color>
+
+    <color name="slideBackgroundColor">#003d7e</color>
+    <color name="orange">#FF6D00</color>
+
+    <!-- Active and passive indicators colors  -->
+    <color name="colorActiveIndicator">#2962FF</color>
+    <color name="colorPassiveIndcator">#662962FF</color>
+
 </resources>
