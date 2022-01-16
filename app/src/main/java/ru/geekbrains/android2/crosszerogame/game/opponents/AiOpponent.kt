@@ -2,15 +2,15 @@ package ru.geekbrains.android2.crosszerogame.game.opponents
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import ru.geekbrains.android2.crosszerogame.game.GameRepositoryImpl
 import ru.geekbrains.android2.crosszerogame.structure.GameRepository
 import ru.geekbrains.android2.crosszerogame.structure.Opponent
 import ru.geekbrains.android2.crosszerogame.structure.data.Cell
+import ru.geekbrains.android2.crosszerogame.structure.data.MoveResult
 import ru.geekbrains.android2.crosszerogame.structure.data.Player
 
-class AiOpponent(private val fieldSize: Int, private val isCross: Boolean) : Opponent {
+class AiOpponent(private val fieldSize: Int, isCross: Boolean) : Opponent {
     companion object {
         private const val DELAY_TIME: Long = 100
     }
@@ -18,38 +18,41 @@ class AiOpponent(private val fieldSize: Int, private val isCross: Boolean) : Opp
     private val repository: GameRepository = GameRepositoryImpl()
     private val chipPlayer = if (isCross) Cell.ZERO else Cell.CROSS
     private val chipAI = if (isCross) Cell.CROSS else Cell.ZERO
-    private val _state = MutableStateFlow<Opponent.State>(Opponent.State.Created)
-    override val state: Flow<Opponent.State>
-        get() = _state
 
     private var playerStep = GameRepository.Step(0, 0, 0)
     private var aiStep = GameRepository.Step(0, 0, 0)
 
-    override fun preparing(): Flow<Player> = flow {
+    private val player = Player(nick = "")
+    override val IsReady: Boolean = true
+
+    override fun preparing(): Flow<Player?> = flow {
         repository.newGame(fieldSize)
-        if (isCross)
-            doMove()
-        emit(Player(nick = "AI"))
+        emit(player)
     }
 
-    override suspend fun sendMove(x: Int, y: Int) {
-        val result = if (chipPlayer == Cell.CROSS)
+    override fun waitMove(): Flow<Player?> = flow {
+        player.state = Player.State.PLAYING
+        doMove()
+        emit(player)
+    }
+
+    override suspend fun sendMove(x: Int, y: Int, result: MoveResult) {
+        if (chipPlayer == Cell.CROSS)
             repository.pasteCross(x, y)
         else
             repository.pasteZero(x, y)
-        if (result == GameRepository.Result.CONTINUE) {
-            delay(DELAY_TIME)
-            doMove()
-        }
     }
 
     private suspend fun doMove() {
+        delay(DELAY_TIME)
         val move = aiMove()
         if (chipAI == Cell.CROSS)
             repository.pasteCross(move.first, move.second)
         else
             repository.pasteZero(move.first, move.second)
-        _state.tryEmit(Opponent.State.Move(move.first, move.second))
+        player.lastTimeActive = System.currentTimeMillis()
+        player.moveX = move.first
+        player.moveY = move.second
     }
 
     override suspend fun sendBye() {
@@ -64,7 +67,7 @@ class AiOpponent(private val fieldSize: Int, private val isCross: Boolean) : Opp
 
         for (y in 0 until fieldSize) {
             for (x in 0 until fieldSize) {
-                if (repository.field[y][x] != Cell.EMPTY)
+                if (repository.getCell(x, y) != Cell.EMPTY)
                     continue
                 move = calcMove(true, x, y)
                 if (move.first > -1)

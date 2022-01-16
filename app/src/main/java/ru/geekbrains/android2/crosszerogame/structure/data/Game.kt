@@ -1,11 +1,16 @@
 package ru.geekbrains.android2.crosszerogame.structure.data
 
 data class Game(
-    val id: Int,
+    val id: String = "",
     val fieldSize: Int,
-    val chipsForWin: Int,
+    var chipsForWin: Int,
     val level: Int,
     val moveTime: Int,
-    val playerCross: Player?,
-    val playerZero: Player?
-)
+    var state: State = State.WAIT_OPPONENT,
+    var playerCross: Player?,
+    var playerZero: Player?
+) {
+    enum class State {
+        WAIT_OPPONENT, CONTINUE, FINISH
+    }
+}

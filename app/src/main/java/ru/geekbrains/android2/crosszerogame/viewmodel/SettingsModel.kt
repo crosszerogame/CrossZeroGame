@@ -9,6 +9,7 @@ import ru.geekbrains.android2.crosszerogame.game.GameManagerImpl
 import ru.geekbrains.android2.crosszerogame.game.GameRepositoryImpl
 import ru.geekbrains.android2.crosszerogame.structure.GameManager
 import ru.geekbrains.android2.crosszerogame.structure.GameRepository
+import ru.geekbrains.android2.crosszerogame.structure.data.Game
 import ru.geekbrains.android2.crosszerogame.utils.Settings
 import ru.geekbrains.android2.crosszerogame.utils.strings.SettingsStrings
 import java.util.regex.Pattern
@@ -135,15 +136,15 @@ class SettingsModel : ViewModel() {
                 chipsForWin = chipsForWin,
                 beginAsFirst = beginAsFirst,
                 nick = nick,
-                level = level,
+                level = level + SHIFT_LEVEL,
                 time = time + SHIFT_TIME
             )
         )
     }
 
-    fun launchGame(nick: String, idGame: Int) {
+    fun launchGame(nick: String, game: Game) {
         GameModel.launchGame(
-            GameParameters.RemoteConnect(nick, idGame)
+            GameParameters.RemoteConnect(nick, game)
         )
     }
 

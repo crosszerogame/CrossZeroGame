@@ -8,7 +8,7 @@ import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings
 class GameHolder(
     private val binding: ItemGameBinding,
     private val strings: GameStrings,
-    private val onItemClick: ((Int) -> Unit)
+    private val onItemClick: ((Game) -> Unit)
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun setItem(game: Game) = binding.run {
@@ -18,7 +18,7 @@ class GameHolder(
             nick = game.playerCross?.nick ?: ""
             waitCross = false
         } else {
-            nick = game.playerZero.nick
+            nick = game.playerZero?.nick ?: ""
             waitCross = true
         }
         tvNick.text = nick
@@ -27,7 +27,7 @@ class GameHolder(
         tvSize.text = String.format(strings.fieldSizeFormat, game.fieldSize, game.fieldSize, game.chipsForWin)
         tvTime.text = String.format(strings.moveTimeFormat, game.moveTime)
         root.setOnClickListener {
-            onItemClick(game.id)
+            onItemClick(game)
         }
     }
 }

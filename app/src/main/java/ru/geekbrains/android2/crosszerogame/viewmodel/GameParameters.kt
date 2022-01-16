@@ -1,5 +1,6 @@
 package ru.geekbrains.android2.crosszerogame.viewmodel
 
+import ru.geekbrains.android2.crosszerogame.structure.data.Game
 
 sealed class GameParameters {
     data class SingleLaunch(
@@ -16,6 +17,6 @@ sealed class GameParameters {
     ) : GameParameters()
 
     data class RemoteConnect(
-        val nick: String, val idGame: Int
+        val nick: String, val game: Game
     ) : GameParameters()
 }

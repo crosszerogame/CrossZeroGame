@@ -1,7 +1,8 @@
 package ru.geekbrains.android2.crosszerogame.viewmodel
 
 sealed class GameState {
-    data class NewGame(val fieldSize: Int) : GameState()
+    data class NewGame(val isWait: Boolean) : GameState()
+    data class NewOpponent(val nick: String) : GameState()
     data class PasteChip(val x: Int, val y: Int, val isCross: Boolean) : GameState()
     data class TimePlayer(val sec: Int) : GameState()
     data class TimeOpponent(val sec: Int) : GameState()

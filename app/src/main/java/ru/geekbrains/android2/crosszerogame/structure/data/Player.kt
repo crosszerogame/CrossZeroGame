@@ -1,7 +1,14 @@
 package ru.geekbrains.android2.crosszerogame.structure.data
 
 data class Player(
-    val id: Int = 0,
+    val id: String = "",
     val nick: String,
-    val lastTimeActive: Long = 0
-)
+    var state: State = State.CREATED,
+    var moveX: Int = -1,
+    var moveY: Int = -1,
+    var lastTimeActive: Long = 0
+) {
+   enum class State {
+       CREATED, PLAYING, LEFT
+   }
+}

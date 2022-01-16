@@ -29,7 +29,10 @@ class GameRepositoryImpl : GameRepository {
     }
 
     override var chipsForWin: Int = DEFAULT_CHIPS_FOR_WIN
-    override var field: Array<Array<Cell>> = Array(DEFAULT_FIELD_SIZE) {
+
+    override fun getCell(x: Int, y: Int) = field[y][x]
+
+    private var field: Array<Array<Cell>> = Array(DEFAULT_FIELD_SIZE) {
         Array(DEFAULT_FIELD_SIZE) { Cell.EMPTY }
     }
 

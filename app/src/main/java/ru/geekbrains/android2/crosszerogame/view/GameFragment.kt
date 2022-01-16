@@ -128,20 +128,6 @@ class GameFragment : Fragment(), BackEvent {
         dismissMessage()
         setSubtitle("")
         when (state) {
-            is GameState.PasteChip -> {
-                if (adapter.linear == Linear.HORIZONTAL)
-                    rvField.smoothScrollToPosition(state.x)
-                else
-                    rvField.smoothScrollToPosition(state.y)
-                doMove(state.x, state.y, state.isCross)
-            }
-            is GameState.NewGame ->
-                initField()
-            GameState.WinPlayer -> showMessage(R.string.win_player)
-            GameState.WinOpponent -> showMessage(R.string.win_opponent)
-            GameState.DrawnGame -> showMessage(R.string.drawn)
-            GameState.AbortedGame -> showMessage(R.string.aborted_game)
-            GameState.WaitOpponent -> setSubtitle(getString(R.string.wait_opponent))
             is GameState.TimeOpponent -> setSubtitle(
                 String.format(
                     getString(R.string.time_opponent),
@@ -154,8 +140,37 @@ class GameFragment : Fragment(), BackEvent {
                     state.sec
                 )
             )
+            is GameState.PasteChip -> {
+                if (adapter.linear == Linear.HORIZONTAL)
+                    rvField.smoothScrollToPosition(state.x)
+                else
+                    rvField.smoothScrollToPosition(state.y)
+                doMove(state.x, state.y, state.isCross)
+            }
+            is GameState.NewGame -> {
+                if (state.isWait)
+                    setSubtitle(getString(R.string.wait_opponent))
+                initField()
+            }
+            is GameState.NewOpponent ->
+                showOpponent(state.nick)
+            GameState.WinPlayer -> showMessage(R.string.win_player)
+            GameState.WinOpponent -> showMessage(R.string.win_opponent)
+            GameState.DrawnGame -> showMessage(R.string.drawn)
+            GameState.AbortedGame -> showMessage(R.string.aborted_game)
+            GameState.WaitOpponent -> setSubtitle(getString(R.string.wait_opponent))
             GameState.Timeout -> showMessage(R.string.timeout)
         }
+    }
+
+    private fun showOpponent(nick: String) {
+        if (nick.isEmpty())
+            return
+        val msg = String.format(
+            getString(R.string.connect_opponent),
+            nick
+        )
+        Snackbar.make(rvField, msg, Snackbar.LENGTH_LONG).show()
     }
 
     private fun showMessage(stringId: Int) {

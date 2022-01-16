@@ -206,7 +206,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initRemoteConnect() = binding?.containerRemoteConnect?.run {
-        initNickInput(tilNick, etNick, false)
+        initNickInput(tilNick, etNick)
         adapter = GameAdapter(
             strings = GameStrings(
                 fieldSizeFormat = getString(R.string.field_size),
@@ -214,8 +214,8 @@ class SettingsFragment : Fragment() {
                 waitCrossPlayer = getString(R.string.wait_cross),
                 waitZeroPlayer = getString(R.string.wait_zero)
             )
-        ) { gameId ->
-            model.launchGame(etNick.text.toString(), gameId)
+        ) { game ->
+            model.launchGame(etNick.text.toString(), game)
             requireActivity().onBackPressed()
         }
         rvGames.adapter = adapter
@@ -238,7 +238,7 @@ class SettingsFragment : Fragment() {
         initFieldSize(sbFieldsize, tvFieldsize)
         initLevel()
         initTime()
-        initNickInput(tilNick, etNick, true)
+        initNickInput(tilNick, etNick)
         btnFirst.setOnClickListener {
             model.setFirst(true)
         }
@@ -275,7 +275,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun initNickInput(til: TextInputLayout, et: EditText, isLaunch: Boolean) {
+    private fun initNickInput(til: TextInputLayout, et: EditText) {
         et.doOnTextChanged { text, _, _, _ ->
             if (isNoChange) return@doOnTextChanged
             til.error = null

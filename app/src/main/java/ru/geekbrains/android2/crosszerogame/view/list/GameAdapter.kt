@@ -9,7 +9,7 @@ import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings
 
 class GameAdapter(
     private val strings: GameStrings,
-    private val onItemClick: ((Int) -> Unit)
+    private val onItemClick: ((Game) -> Unit)
 ) : RecyclerView.Adapter<GameHolder>() {
     private val games = mutableListOf<Game>()
 

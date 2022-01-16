@@ -14,7 +14,7 @@ interface GameRepository {
     )
 
     val chipsForWin: Int
-    val field: Array<Array<Cell>>
+    fun getCell(x: Int, y: Int): Cell
     suspend fun newGame(fieldSize: Int)
     fun getChipsForWin(fieldSize: Int): Int
     suspend fun pasteCross(x: Int, y: Int): Result
