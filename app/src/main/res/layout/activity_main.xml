@@ -18,7 +18,7 @@
         android:clickable="true"
         android:focusable="true"
         app:behavior_hideable="true"
-        app:behavior_peekHeight="190dp"
+        app:behavior_peekHeight="250dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

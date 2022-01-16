@@ -9,14 +9,18 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import ru.geekbrains.android2.crosszerogame.R
+import ru.geekbrains.android2.crosszerogame.utils.BackEvent
 
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG_GAME = "game"
     }
     private lateinit var bottomSheet: BottomSheetBehavior<FrameLayout>
-    private val showSettings = {
+    private val showBottom = {
         bottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+    private val hideBottom = {
+        bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,14 +31,16 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             val fragmentTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
             val game = GameFragment()
-            game.onMessageAction = showSettings
+            game.onMessageAction = showBottom
+            game.onHideBottom = hideBottom
             fragmentTransaction.replace(R.id.container, game, TAG_GAME)
                 .replace(R.id.bottom_container, SettingsFragment()).commit()
         } else {
-            bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
             supportFragmentManager.findFragmentByTag(TAG_GAME)?.let {
-                if (it is GameFragment)
-                    it.onMessageAction = showSettings
+                if (it is GameFragment) {
+                    it.onMessageAction = showBottom
+                    it.onHideBottom = hideBottom
+                }
             }
         }
     }
@@ -48,9 +54,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (bottomSheet.state == BottomSheetBehavior.STATE_HIDDEN)
-            bottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
+            showBottom.invoke()
         else
-            bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+            hideBottom.invoke()
 
         return super.onOptionsItemSelected(item)
     }
@@ -63,6 +69,6 @@ class MainActivity : AppCompatActivity() {
         if (bottomSheet.state == BottomSheetBehavior.STATE_HIDDEN)
             super.onBackPressed()
         else
-            bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+            hideBottom.invoke()
     }
 }
