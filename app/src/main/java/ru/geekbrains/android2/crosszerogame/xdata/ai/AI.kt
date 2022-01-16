@@ -1,6 +1,6 @@
-package ru.geekbrains.android2.crosszerogame.data.ai
+package ru.geekbrains.android2.crosszerogame.xdata.ai
 
-import ru.geekbrains.android2.crosszerogame.data.*
+import ru.geekbrains.android2.crosszerogame.xdata.*
 
 class AI() {
     private var SIZE = GameConstants.MIN_FIELD_SIZE

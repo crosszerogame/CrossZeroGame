@@ -2,8 +2,8 @@ package ru.geekbrains.android2.crosszerogame
 
 import android.app.Application
 import com.parse.Parse
-import ru.geekbrains.android2.crosszerogame.data.GameRepositoryImpl
-import ru.geekbrains.android2.crosszerogame.data.remote.back4app.CrossZeroDBImpl
+import ru.geekbrains.android2.crosszerogame.xdata.GameRepositoryImpl
+import ru.geekbrains.android2.crosszerogame.xdata.remote.back4app.CrossZeroDBImpl
 
 class App : Application() {
     override fun onCreate() {

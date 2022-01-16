@@ -1,7 +1,7 @@
-package ru.geekbrains.android2.crosszerogame.data.remote
+package ru.geekbrains.android2.crosszerogame.xdata.remote
 
-import ru.geekbrains.android2.crosszerogame.data.Game
-import ru.geekbrains.android2.crosszerogame.data.Gamer
+import ru.geekbrains.android2.crosszerogame.xdata.Game
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 
 class RemoteGame(private val db: CrossZeroDB) {
 
@@ -26,24 +26,25 @@ class RemoteGame(private val db: CrossZeroDB) {
     }
 
     suspend fun setOpponentRemote(gamer: Gamer): Boolean {
+        var ok=false
         val g = db.getGamer(gamer.keyGamer)
-        if (g != null) {
+        g?.let{
             if (gamer.keyOpponent != "") {
                 val o = db.getGamer(gamer.keyOpponent)
-                if (o != null) {
-                    if (o.keyOpponent == "" || o.keyOpponent == g.keyGamer) {
+                o?.let{
+                    if ((o.keyOpponent == "") || (o.keyOpponent == g.keyGamer)) {
                         o.keyOpponent = g.keyGamer
-
                         if (g.keyOpponent != gamer.keyOpponent) delOpponentWithGame(g)
                         g.keyOpponent = o.keyGamer
-                        return (db.updGamer(o.keyGamer, o) && db.updGamer(g.keyGamer, g))
-                    } else return false
-                } else return false
+                        ok= (db.updGamer(o.keyGamer, o) && db.updGamer(g.keyGamer, g))
+                    }
+                }
             } else {
                 //если keyOpponent==""
-                return delOpponentWithGame(gamer)
+                ok= delOpponentWithGame(gamer)
             }
-        } else return false
+        }
+        return ok
     }
 
     suspend fun delGamer(gamer: Gamer): Boolean {
@@ -52,11 +53,11 @@ class RemoteGame(private val db: CrossZeroDB) {
     }
 
     private suspend fun delOpponentWithGame(gamer: Gamer): Boolean {
+        var ok=false
         val g = db.getGamer(gamer.keyGamer)
-        if (g != null) {
-            if (g.keyOpponent != "") {
+        g?.let{
                 val o = db.getGamer(g.keyOpponent)
-                if (o != null) {
+                o?.let{
                     if (o.keyOpponent == g.keyGamer) {
                         if (o.keyGame != "") db.delGame(o.keyGame)
                         o.keyGame = ""
@@ -68,9 +69,9 @@ class RemoteGame(private val db: CrossZeroDB) {
                 g.keyOpponent = ""
                 g.keyGame = ""
                 db.updGamer(g.keyGamer, g)
-            }
-            return true
-        } else return false
+            ok=true
+        }
+        return ok
     }
 
     suspend fun opponentsListRemote(gamer: Gamer): List<Gamer>? = db.listGamer()?.filter {

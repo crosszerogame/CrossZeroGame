@@ -1,17 +1,17 @@
-package ru.geekbrains.android2.crosszerogame.data
+package ru.geekbrains.android2.crosszerogame.xdata
 
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN1
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN1_SIZE1
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN1_SIZE2
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN2
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN2_SIZE1
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN2_SIZE2
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN3
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN3_SIZE1
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.DOTS_TO_WIN3_SIZE2
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.MAX_FIELD_SIZE
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.MIN_FIELD_SIZE
-import ru.geekbrains.android2.crosszerogame.data.GameConstants.MIN_TIME_FOR_TURN
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN1
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN1_SIZE1
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN1_SIZE2
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN2
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN2_SIZE1
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN2_SIZE2
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN3
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN3_SIZE1
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN3_SIZE2
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.MAX_FIELD_SIZE
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.MIN_FIELD_SIZE
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.MIN_TIME_FOR_TURN
 
 data class Game(
     var keyGame: String = "",
@@ -31,12 +31,6 @@ data class Game(
 
 ) {
     init {
-        //       if (motionXIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
-//            && motionYIndex in MIN_FIELD_SIZE..MAX_FIELD_SIZE
-//        )
-//            gameField[motionYIndex][motionXIndex] =
-//                if (turnOfGamer) CellField.GAMER else CellField.OPPONENT
-
         if (gameFieldSize !in MIN_FIELD_SIZE..MAX_FIELD_SIZE)
             gameFieldSize = MIN_FIELD_SIZE
 
@@ -50,6 +44,7 @@ data class Game(
     }
 
     fun revertGamerToOpponent() {
+        //включить, если будем передавать игровое поле через БД
 //        for ((j, arrCell) in gameField.withIndex()) {
 //            for ((i,cell) in arrCell.withIndex()) if (cell == CellField.GAMER) gameField[j][i]= CellField.OPPONENT
 //            else if (cell == CellField.OPPONENT) gameField[j][i]=CellField.GAMER

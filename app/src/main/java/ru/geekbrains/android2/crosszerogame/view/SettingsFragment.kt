@@ -17,7 +17,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.layout_remote_connector.*
 import ru.geekbrains.android2.crosszerogame.R
-import ru.geekbrains.android2.crosszerogame.data.Gamer
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 import ru.geekbrains.android2.crosszerogame.databinding.FragmentSettingsBinding
 import ru.geekbrains.android2.crosszerogame.utils.SettingsImpl
 import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings

@@ -8,10 +8,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import ru.geekbrains.android2.crosszerogame.App.Companion.gr
 import ru.geekbrains.android2.crosszerogame.App.Companion.grAi
-import ru.geekbrains.android2.crosszerogame.data.Game
-import ru.geekbrains.android2.crosszerogame.data.GameConstants
-import ru.geekbrains.android2.crosszerogame.data.Gamer
-import ru.geekbrains.android2.crosszerogame.view.list.CellValue
+import ru.geekbrains.android2.crosszerogame.xdata.Game
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 
 class GameModel : ViewModel() {
     companion object {
@@ -27,30 +26,30 @@ class GameModel : ViewModel() {
 
     private val _state: MutableLiveData<GameState> = MutableLiveData()
     val state: LiveData<GameState> = _state
-    private var gamer = Gamer()
-    private var opponent = Gamer()
-    private var game = Game()
-    private var size: Int = DEFAULT_SIZE
+    private var currentGamer = Gamer()
+    private var currentOpponent = Gamer()
+    private var currentGame = Game()
+    private var currentFieldSize: Int = DEFAULT_SIZE
     val fieldSize: Int
-        get() = size
-    private var isFirst: Boolean = DEFAULT_FIRST
-    private var remoteOpponent = false
+        get() = currentFieldSize
+    private var currentGamerIsFirst: Boolean = DEFAULT_FIRST
+    private var remoteOpponentGame = false
 
     private val parametersObserver = Observer<GameParameters> {
         when (it) {
             is GameParameters.SingleLaunch -> {
-                size = it.fieldSize
-                isFirst = it.beginAsFirst
-                remoteOpponent = false
+                currentFieldSize = it.fieldSize
+                currentGamerIsFirst = it.beginAsFirst
+                remoteOpponentGame = false
                 newGameAi()
             }
             is GameParameters.GetOpponent -> {
-                size = it.fieldSize
-                remoteOpponent = true
-                getOpp(it)
+                currentFieldSize = it.fieldSize
+                remoteOpponentGame = true
+                getOpp(it, true)
             }
             is GameParameters.SetOpponent -> {
-                remoteOpponent = true
+                remoteOpponentGame = true
                 setOpp(it)
             }
         }
@@ -61,19 +60,17 @@ class GameModel : ViewModel() {
                 + SupervisorJob()
                 + CoroutineExceptionHandler { _, throwable -> handleError(throwable) })
 
-    fun getCell(x: Int, y: Int) = when (game.gameField[y][x]) {
-        GameConstants.CellField.GAMER -> if (isFirst) CellValue.CROSS else CellValue.ZERO
-        GameConstants.CellField.OPPONENT -> if (isFirst) CellValue.ZERO else CellValue.CROSS
-        GameConstants.CellField.EMPTY -> CellValue.EMPTY
-    }
+//    fun getCell(x: Int, y: Int) = when (game.gameField[y][x]) {
+//        GameConstants.CellField.GAMER -> if (gamerIsFirst) CellValue.CROSS else CellValue.ZERO
+//        GameConstants.CellField.OPPONENT -> if (gamerIsFirst) CellValue.ZERO else CellValue.CROSS
+//        GameConstants.CellField.EMPTY -> CellValue.EMPTY
+//    }
 
     fun init() {
         parameters.observeForever(parametersObserver)
-        if (!remoteOpponent) {
-            if (game.gameStatus == GameConstants.GameStatus.NEW_GAME)
+        if (!remoteOpponentGame) {
+            if (currentGame.gameStatus == GameConstants.GameStatus.NEW_GAME)
                 newGameAi()
-            else
-                postState()
         }
     }
 
@@ -83,57 +80,79 @@ class GameModel : ViewModel() {
     }
 
     private fun newGameAi() {
-        _state.value = GameState.NewGame(
-            remoteOpponent = false,
-            fieldSize = size,
-            opponentIsFirst = !isFirst
-        )
         scope.launch {
-            gamer = grAi.gamer(
-                gameFieldSize = size,
-                nikGamer = "Gamer"
+            currentGamer = grAi.gamer(
+                gameFieldSize = currentFieldSize,
             )
-            game = grAi.game(
-                gameStatus = if (isFirst)
-                    GameConstants.GameStatus.NEW_GAME_FIRST_GAMER
-                else
-                    GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT
+            currentFieldSize = currentGamer.gameFieldSize
+            _state.value = GameState.NewGame(
+                remoteOpponent = false,
+                fieldSize = currentFieldSize,
+                opponentIsFirst = !currentGamerIsFirst
             )
         }
     }
 
-    private fun getOpp(params: GameParameters.GetOpponent) {
+    fun readyField() {
+        if (!remoteOpponentGame)
+            scope.launch {
+                currentGame = grAi.game(
+                    gameStatus = if (currentGamerIsFirst)
+                        GameConstants.GameStatus.NEW_GAME_FIRST_GAMER
+                    else
+                        GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT
+                )
+                if (!currentGamerIsFirst) postState(
+                    currentGamerIsFirst,
+                    currentGame.gameStatus,
+                    currentGame.motionXIndex,
+                    currentGame.motionYIndex,
+                    currentGamerIsFirst
+                )
+            }
+    }
+
+
+    private fun getOpp(params: GameParameters.GetOpponent, resetGamer: Boolean) {
         scope.launch {
-            //регистрируем геймера, если есть, то обновляем
-            gamer = gr.gamer(
-                gameFieldSize = params.fieldSize,
-                nikGamer = params.nick
-            )
-            // очищаем предыдущих оппонентов
-            gr.setOpponent(
-                key = ""
-            )
+            if (resetGamer) {
+                //регистрируем геймера, если есть, то обновляем
+                currentGamer = gr.gamer(
+                    gameFieldSize = params.fieldSize,
+                    nikGamer = params.nick
+                )
+                // очищаем предыдущих оппонентов
+                gr.setOpponent(
+                    key = ""
+                )
+            }
             //ожидаем появления предложения на игру и принимаем предложение
-            gr.flowGetOpponent().collect {
-                opponent = it.first
-                game = it.second
-                size = game.gameFieldSize
-                isFirst = game.turnOfGamer
+            gr.flowGetOpponent().collect { pairOpponent ->
+                currentOpponent = pairOpponent.first
+                currentGame = pairOpponent.second
+                currentFieldSize = currentGame.gameFieldSize
+                currentGamerIsFirst = currentGame.turnOfGamer
+
                 _state.value = GameState.NewGame(
                     remoteOpponent = true,
-                    fieldSize = size,
-                    nikOpponent = opponent.nikGamer,
-                    levelOpponent = opponent.levelGamer,
-                    opponentIsFirst = !isFirst
+                    fieldSize = currentFieldSize,
+                    nikOpponent = currentOpponent.nikGamer,
+                    levelOpponent = currentOpponent.levelGamer,
+                    opponentIsFirst = !currentGamerIsFirst
                 )
-
                 gr.flowGame(
                     motionXIndex = -1,
                     motionYIndex = -1,
                     gameStatus = GameConstants.GameStatus.GAME_IS_ON
-                ).collect {
-                    game = it
-                    postState()
+                ).collect { pairGame ->
+                    currentGame = pairGame.second
+                    postState(
+                        pairGame.first,
+                        pairGame.second.gameStatus,
+                        pairGame.second.motionXIndex,
+                        pairGame.second.motionYIndex,
+                        currentGamerIsFirst
+                    )
                 }
             }
 
@@ -142,7 +161,7 @@ class GameModel : ViewModel() {
 
     private fun setOpp(params: GameParameters.SetOpponent) {
         scope.launch {
-            gamer.keyOpponent = params.keyOpponent
+            currentGamer.keyOpponent = params.keyOpponent
             var gm: Game? = null
             var attempt = 1
             //почему-то с первой попытки не всегда проходит
@@ -160,61 +179,97 @@ class GameModel : ViewModel() {
             }
 
             gm?.let {
-                game = gm
-                size = game.gameFieldSize
-                isFirst = game.turnOfGamer
-                //    val opponent = gr.getOpponent()
-                //       opponent?.let {
-                _state.value = GameState.NewGame(
-                    remoteOpponent = true,
-                    fieldSize = size,
-                    nikOpponent = params.nikOpponent,
-                    levelOpponent = params.levelOpponent,
-                    opponentIsFirst = !isFirst
-                )
-                gr.flowGame(
-                    motionXIndex = -1,
-                    motionYIndex = -1,
-                    gameStatus = GameConstants.GameStatus.GAME_IS_ON
-                ).collect {
-                    game = it
-                    postState()
+                currentGame = it
+                currentFieldSize = currentGame.gameFieldSize
+                currentGamerIsFirst = currentGame.turnOfGamer
+                val opponent = gr.getOpponent()
+                opponent?.let {
+                    currentOpponent = opponent
+                    _state.value = GameState.NewGame(
+                        remoteOpponent = true,
+                        fieldSize = currentFieldSize,
+                        nikOpponent = opponent.nikGamer,
+                        levelOpponent = opponent.levelGamer,
+                        opponentIsFirst = !currentGamerIsFirst
+                    )
+                    gr.flowGame(
+                        motionXIndex = -1,
+                        motionYIndex = -1,
+                        gameStatus = GameConstants.GameStatus.GAME_IS_ON
+                    ).collect { pairGame ->
+                        currentGame = pairGame.second
+                        postState(
+                            pairGame.first,
+                            pairGame.second.gameStatus,
+                            pairGame.second.motionXIndex,
+                            pairGame.second.motionYIndex,
+                            currentGamerIsFirst
+                        )
+                    }
                 }
-                //      }
             }
         }
     }
 
     fun doMove(x: Int, y: Int) {
-        if (game.gameStatus == GameConstants.GameStatus.GAME_IS_ON) {
-            _state.value = GameState.MoveGamer(x, y, isFirst)
-
+        if (currentGame.gameStatus == GameConstants.GameStatus.GAME_IS_ON) {
             scope.launch {
-                if (remoteOpponent)
+                if (remoteOpponentGame)
                     gr.flowGame(
                         motionXIndex = x,
                         motionYIndex = y,
                         gameStatus = GameConstants.GameStatus.GAME_IS_ON
                     ).collect {
-                        game = it
-                        postState()
+                        currentGame = it.second
+                        postState(
+                            it.first,
+                            it.second.gameStatus,
+                            it.second.motionXIndex,
+                            it.second.motionYIndex,
+                            currentGamerIsFirst
+                        )
                     }
-                else
+                else {
+
                     grAi.flowGame(
                         motionXIndex = x,
                         motionYIndex = y,
                         gameStatus = GameConstants.GameStatus.GAME_IS_ON
                     ).collect {
-                        game = it
-                        postState()
+                        postState(
+                            true,
+                            GameConstants.GameStatus.GAME_IS_ON,
+                            x,
+                            y,
+                            currentGamerIsFirst
+                        )
+                        currentGame = it.second
+                        postState(
+                            false, it.second.gameStatus,
+                            it.second.motionXIndex,
+                            it.second.motionYIndex,
+                            currentGamerIsFirst
+                        )
                     }
+                }
             }
         }
     }
 
     fun repeatGame() {
-        if (remoteOpponent) {
-            //    TODO()
+        if (remoteOpponentGame) {
+            if (currentGamerIsFirst) {
+                val params = GameParameters.SetOpponent(
+                    currentOpponent.keyOpponent,
+                    false,
+                    currentOpponent.nikGamer,
+                    currentOpponent.levelGamer
+                )
+                setOpp(params)
+            } else {
+                val params = GameParameters.GetOpponent(0, 0, "", 0)
+                getOpp(params, false)
+            }
         } else {
             newGameAi()
         }
@@ -224,34 +279,47 @@ class GameModel : ViewModel() {
         //   TODO()
     }
 
-    private fun postState() {
-        when (game.gameStatus) {
-            GameConstants.GameStatus.GAME_IS_ON -> {
-                if (game.turnOfGamer) doOpponentMove()
+    private fun postState(
+        moveOfGamer: Boolean,
+        gameStatus: GameConstants.GameStatus,
+        motionXIndex: Int, motionYIndex: Int,
+        isFirst: Boolean
+    ) {
+        if (moveOfGamer) {
+            when (gameStatus) {
+                GameConstants.GameStatus.GAME_IS_ON ->
+                    _state.value = GameState.MoveGamer(motionXIndex, motionYIndex, isFirst)
+                GameConstants.GameStatus.WIN_GAMER -> {
+                    _state.value = GameState.MoveGamer(motionXIndex, motionYIndex, isFirst)
+                    _state.value = GameState.WinGamer
+                }
+                GameConstants.GameStatus.DRAWN_GAME -> {
+                    _state.value = GameState.MoveGamer(motionXIndex, motionYIndex, isFirst)
+                    _state.value = GameState.DrawnGame
+                }
+                GameConstants.GameStatus.ABORTED_GAME -> _state.value = GameState.AbortedGame
             }
-            GameConstants.GameStatus.WIN_GAMER ->
-                _state.value = GameState.WinGamer
-            GameConstants.GameStatus.WIN_OPPONENT -> {
-                doOpponentMove()
-                _state.value = GameState.WinOpponent
+        } else {
+            when (gameStatus) {
+                GameConstants.GameStatus.GAME_IS_ON ->
+                    _state.value = GameState.MoveOpponent(motionXIndex, motionYIndex, !isFirst)
+                GameConstants.GameStatus.WIN_OPPONENT -> {
+                    _state.value =
+                        GameState.MoveOpponent(motionXIndex, motionYIndex, !isFirst)
+                    _state.value = GameState.WinOpponent
+                }
+                GameConstants.GameStatus.WIN_GAMER -> {
+                    _state.value = GameState.WinGamer
+                }
+                GameConstants.GameStatus.DRAWN_GAME -> {
+                    _state.value =
+                        GameState.MoveOpponent(motionXIndex, motionYIndex, !isFirst)
+                    _state.value = GameState.DrawnGame
+                }
+                GameConstants.GameStatus.ABORTED_GAME -> _state.value = GameState.AbortedGame
             }
-            GameConstants.GameStatus.DRAWN_GAME -> {
-                doOpponentMove()
-                _state.value = GameState.DrawnGame
-            }
-            GameConstants.GameStatus.ABORTED_GAME ->
-                _state.value = GameState.AbortedGame
         }
-    }
 
-    private fun doOpponentMove() {
-        if (game.motionXIndex > -1)
-            _state.value = GameState.MoveOpponent(game.motionXIndex, game.motionYIndex, !isFirst)
-    }
-
-    fun readyField() {
-        if (game.gameStatus == GameConstants.GameStatus.GAME_IS_ON && !isFirst)
-            doOpponentMove()
     }
 
     private fun handleError(error: Throwable) {

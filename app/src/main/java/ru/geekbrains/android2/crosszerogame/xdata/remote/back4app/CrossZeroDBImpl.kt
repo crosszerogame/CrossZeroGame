@@ -1,11 +1,11 @@
-package ru.geekbrains.android2.crosszerogame.data.remote.back4app
+package ru.geekbrains.android2.crosszerogame.xdata.remote.back4app
 
 import com.parse.ParseObject
 import com.parse.ParseQuery
-import ru.geekbrains.android2.crosszerogame.data.Game
-import ru.geekbrains.android2.crosszerogame.data.GameConstants
-import ru.geekbrains.android2.crosszerogame.data.Gamer
-import ru.geekbrains.android2.crosszerogame.data.remote.CrossZeroDB
+import ru.geekbrains.android2.crosszerogame.xdata.Game
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
+import ru.geekbrains.android2.crosszerogame.xdata.remote.CrossZeroDB
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 

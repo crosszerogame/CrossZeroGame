@@ -3,7 +3,7 @@ package ru.geekbrains.android2.crosszerogame.view.list
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import ru.geekbrains.android2.crosszerogame.data.Gamer
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 import ru.geekbrains.android2.crosszerogame.databinding.ItemGameBinding
 import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings
 

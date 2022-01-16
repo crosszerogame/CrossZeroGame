@@ -1,4 +1,4 @@
-package ru.geekbrains.android2.crosszerogame.data
+package ru.geekbrains.android2.crosszerogame.xdata
 
 data class Gamer(
     var keyGamer: String = "",

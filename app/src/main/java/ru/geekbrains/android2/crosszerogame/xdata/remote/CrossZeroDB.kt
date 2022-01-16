@@ -1,7 +1,7 @@
-package ru.geekbrains.android2.crosszerogame.data.remote
+package ru.geekbrains.android2.crosszerogame.xdata.remote
 
-import ru.geekbrains.android2.crosszerogame.data.Game
-import ru.geekbrains.android2.crosszerogame.data.Gamer
+import ru.geekbrains.android2.crosszerogame.xdata.Game
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 
 interface CrossZeroDB {
     suspend fun insGamer(gamer: Gamer): String?

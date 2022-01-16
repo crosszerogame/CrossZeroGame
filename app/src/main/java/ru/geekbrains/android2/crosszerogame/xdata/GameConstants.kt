@@ -1,4 +1,4 @@
-package ru.geekbrains.android2.crosszerogame.data
+package ru.geekbrains.android2.crosszerogame.xdata
 
 object GameConstants {
     const val MAX_FIELD_SIZE = 30

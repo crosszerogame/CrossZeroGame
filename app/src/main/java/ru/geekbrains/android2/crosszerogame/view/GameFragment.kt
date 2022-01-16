@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.utils.addAction
+import ru.geekbrains.android2.crosszerogame.view.list.CellValue
 import ru.geekbrains.android2.crosszerogame.view.list.FieldAdapter
 import ru.geekbrains.android2.crosszerogame.view.list.Linear
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
@@ -61,10 +62,9 @@ class GameFragment : Fragment(), BackEvent {
                     cancel()
                 }
             }
-
             override fun onFinish() {
                 resizeField(model.fieldSize)
-                restoreField()
+  //              restoreField()
                 model.readyField()
                 rvField.visibility = View.VISIBLE
             }
@@ -116,15 +116,16 @@ class GameFragment : Fragment(), BackEvent {
         return size
     }
 
-    private fun restoreField() {
-        val size = model.fieldSize
-        for (x in 0 until size) {
-            for (y in 0 until size) {
-                adapter.setCell(x, y, model.getCell(x, y))
-            }
-        }
-        adapter.notifyDataSetChanged()
-    }
+//    private fun restoreField() {
+//        val size = model.fieldSize
+//        for (x in 0 until size) {
+//            for (y in 0 until size) {
+//     //           adapter.setCell(x, y, model.getCell(x, y))
+//                adapter.setCell(x, y, CellValue.EMPTY)
+//            }
+//        }
+//        adapter.notifyDataSetChanged()
+//    }
 
     private fun changeGameState(state: GameState) {
         dismissMessage()
@@ -171,6 +172,7 @@ class GameFragment : Fragment(), BackEvent {
             messageBar?.setAction(android.R.string.ok) {
                 initField()
                 dismissMessage()
+
             }?.addAction(R.layout.snackbar_extra_button, android.R.string.cancel) {
                 model.abortGame()
                 dismissMessage()
@@ -183,6 +185,7 @@ class GameFragment : Fragment(), BackEvent {
             Locale.getDefault(), getString(R.string.opponent_info),
             state.nikOpponent,
             if (state.opponentIsFirst) getString(R.string.cross) else getString(R.string.zero),
+            state.fieldSize.toString(),
             state.fieldSize.toString(),
             state.levelOpponent.toString()
         )

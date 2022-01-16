@@ -1,6 +1,6 @@
 package ru.geekbrains.android2.crosszerogame.viewmodel
 
-import ru.geekbrains.android2.crosszerogame.data.Gamer
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 
 sealed class SettingsState {
     data class Settings(

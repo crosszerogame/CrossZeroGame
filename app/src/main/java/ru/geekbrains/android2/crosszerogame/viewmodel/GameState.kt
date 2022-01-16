@@ -1,6 +1,6 @@
 package ru.geekbrains.android2.crosszerogame.viewmodel
 
-import ru.geekbrains.android2.crosszerogame.data.GameConstants
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants
 
 sealed class GameState {
     data class NewGame(
