@@ -17,14 +17,15 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.layout_remote_connector.*
 import ru.geekbrains.android2.crosszerogame.R
-import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 import ru.geekbrains.android2.crosszerogame.databinding.FragmentSettingsBinding
 import ru.geekbrains.android2.crosszerogame.utils.SettingsImpl
+import ru.geekbrains.android2.crosszerogame.utils.setSubtitle
 import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings
 import ru.geekbrains.android2.crosszerogame.utils.strings.SettingsStrings
 import ru.geekbrains.android2.crosszerogame.view.list.OpponentsAdapter
 import ru.geekbrains.android2.crosszerogame.viewmodel.SettingsModel
 import ru.geekbrains.android2.crosszerogame.viewmodel.SettingsState
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 
 class SettingsFragment : Fragment() {
     companion object {
@@ -204,6 +205,7 @@ class SettingsFragment : Fragment() {
         adapter.notifyDataSetChanged()
         btnExit.setOnClickListener {
             //TODO remove Gamer from server
+            setSubtitle("")
             isCreatedRemoveGame = false
             setTab(SettingsModel.Tab.REMOTE_CREATE)
         }
@@ -225,6 +227,7 @@ class SettingsFragment : Fragment() {
         initLevel()
         initNickInput(tilNick, etNick)
         btnStart.setOnClickListener {
+            setSubtitle(getString(R.string.wait_opponent))
             model.launchGame(
                 fieldSize = sbFieldsize.progress,
                 nick = etNick.text.toString(),
@@ -245,6 +248,7 @@ class SettingsFragment : Fragment() {
             model.setFirst(false)
         }
         btnStart.setOnClickListener {
+            setSubtitle("")
             model.launchGame(
                 fieldSize = sbFieldsize.progress,
                 beginAsFirst = btnFirst.isChecked

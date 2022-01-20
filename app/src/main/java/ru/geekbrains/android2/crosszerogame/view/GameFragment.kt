@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.utils.addAction
+import ru.geekbrains.android2.crosszerogame.utils.setSubtitle
 import ru.geekbrains.android2.crosszerogame.view.list.FieldAdapter
 import ru.geekbrains.android2.crosszerogame.view.list.Linear
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
@@ -151,7 +152,7 @@ class GameFragment : Fragment(), BackEvent {
             GameState.WinOpponent -> showMessage(R.string.win_opponent)
             GameState.DrawnGame -> showMessage(R.string.drawn)
             GameState.AbortedGame -> showMessage(R.string.aborted_game)
-            GameState.WaitOpponent -> showMessage(R.string.wait_opponent, false)
+            GameState.WaitOpponent -> setSubtitle(getString(R.string.wait_opponent))
         }
     }
 
@@ -171,6 +172,7 @@ class GameFragment : Fragment(), BackEvent {
     private fun showMessageNewGame(stringMsg: String) {
         messageBar = Snackbar.make(rvField, stringMsg, Snackbar.LENGTH_INDEFINITE)
         messageBar?.setAction(android.R.string.ok) {
+            setSubtitle("")
             initField()
             dismissMessage()
         }?.addAction(R.layout.snackbar_extra_button, R.string.no) {

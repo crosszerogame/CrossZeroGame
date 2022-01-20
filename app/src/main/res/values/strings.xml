@@ -14,7 +14,7 @@
     <string name="win_player">Вы победили! Сыграем еще?</string>
     <string name="win_opponent">Победил противник. Сыграем еще?</string>
     <string name="aborted_game">Игра прервана</string>
-    <string name="wait_opponent">Ожидание хода противника</string>
+    <string name="wait_opponent">Ожидание противника</string>
     <string name="single_game">Одиночная игра</string>
     <string name="remote_game">Сетевая игра</string>
     <string name="nick">Никнейм</string>
