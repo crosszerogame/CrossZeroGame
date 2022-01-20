@@ -151,7 +151,7 @@ class GameFragment : Fragment(), BackEvent {
             GameState.WinGamer -> showMessage(R.string.win_player)
             GameState.WinOpponent -> showMessage(R.string.win_opponent)
             GameState.DrawnGame -> showMessage(R.string.drawn)
-            GameState.AbortedGame -> showMessage(R.string.aborted_game)
+            GameState.AbortedGame -> showMessage(R.string.aborted_game, false)
             GameState.WaitOpponent -> setSubtitle(getString(R.string.wait_opponent))
         }
     }
