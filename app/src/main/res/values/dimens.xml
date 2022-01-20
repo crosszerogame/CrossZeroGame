@@ -5,5 +5,5 @@
     <dimen name="normal_text">16sp</dimen>
     <dimen name="big_text">20sp</dimen>
     <dimen name="games_list_height">227dp</dimen>
-    <integer name="maxLengthNick">20</integer>
+    <integer name="maxLengthNick">15</integer>
 </resources>

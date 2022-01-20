@@ -5,28 +5,31 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_exit"
+        android:layout_width="50dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/normal_indent"
+        app:icon="@drawable/ic_exit"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="30dp"
+        app:iconTint="?attr/colorOnSecondary"
+        app:layout_constraintBottom_toBottomOf="@id/bg_begin_as"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/bg_begin_as" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_refresh"
         android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/normal_indent"
         app:icon="@drawable/ic_refresh"
         app:iconGravity="textStart"
-        app:iconPadding="@dimen/normal_indent"
-        app:iconSize="50dp"
+        app:iconPadding="0dp"
+        app:iconSize="30dp"
         app:iconTint="?attr/colorOnSecondary"
         app:layout_constraintBottom_toBottomOf="@id/bg_begin_as"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/bg_begin_as"
-        app:layout_constraintTop_toTopOf="@id/bg_begin_as" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tv_begin_as"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/big_indent"
-        android:gravity="center_vertical"
-        android:text="@string/begin_as"
-        app:layout_constraintBottom_toBottomOf="@id/bg_begin_as"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/bg_begin_as" />
 
     <com.google.android.material.button.MaterialButtonToggleGroup
@@ -35,7 +38,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/big_indent"
         android:layout_marginEnd="@dimen/big_indent"
-        app:layout_constraintStart_toEndOf="@id/tv_begin_as"
+        app:layout_constraintEnd_toStartOf="@id/btn_refresh"
+        app:layout_constraintStart_toEndOf="@id/btn_exit"
         app:layout_constraintTop_toTopOf="parent"
         app:selectionRequired="true"
         app:singleSelection="true">
@@ -45,17 +49,25 @@
             style="@style/ButtonCheck"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/first" />
+            android:text="@string/begin_as_first" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_second"
             style="@style/ButtonCheck"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/second" />
+            android:text="@string/begin_as_second" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tv_tip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/big_indent"
+        android:text="@string/remote_game_tip"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bg_begin_as" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_games"
@@ -65,7 +77,7 @@
         android:paddingBottom="@dimen/normal_indent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bg_begin_as" />
+        app:layout_constraintTop_toBottomOf="@id/tv_tip" />
 
     <View
         android:id="@+id/v_block"

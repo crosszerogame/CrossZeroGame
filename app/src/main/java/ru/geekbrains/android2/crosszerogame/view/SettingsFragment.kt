@@ -17,14 +17,15 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.layout_remote_connector.*
 import ru.geekbrains.android2.crosszerogame.R
-import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 import ru.geekbrains.android2.crosszerogame.databinding.FragmentSettingsBinding
 import ru.geekbrains.android2.crosszerogame.utils.SettingsImpl
+import ru.geekbrains.android2.crosszerogame.utils.setSubtitle
 import ru.geekbrains.android2.crosszerogame.utils.strings.GameStrings
 import ru.geekbrains.android2.crosszerogame.utils.strings.SettingsStrings
 import ru.geekbrains.android2.crosszerogame.view.list.OpponentsAdapter
 import ru.geekbrains.android2.crosszerogame.viewmodel.SettingsModel
 import ru.geekbrains.android2.crosszerogame.viewmodel.SettingsState
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 
 class SettingsFragment : Fragment() {
     companion object {
@@ -38,6 +39,7 @@ class SettingsFragment : Fragment() {
 
     private var binding: FragmentSettingsBinding? = null
     private lateinit var adapter: OpponentsAdapter
+    private var isCreatedRemoveGame = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,7 +55,7 @@ class SettingsFragment : Fragment() {
 
         if (savedInstanceState == null) {
             binding?.run {
-                btnSingleLaunch.isChecked = true
+                btnSingleGame.isChecked = true
                 containerRemoteLaunch.root.visibility = View.GONE
                 containerRemoteConnect.root.visibility = View.GONE
             }
@@ -123,7 +125,7 @@ class SettingsFragment : Fragment() {
 
     private fun showNick(isAvailable: Boolean) = binding?.run {
 
-        containerRemoteLaunch.btnCreate.isEnabled = isAvailable
+        containerRemoteLaunch.btnStart.isEnabled = isAvailable
         if (isAvailable) {
             containerRemoteLaunch.tilNick.error = null
             if (containerRemoteConnect.pbLoad.visibility == View.GONE)
@@ -143,14 +145,14 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initSections() = binding?.run {
-        btnSingleLaunch.setOnClickListener {
+        btnSingleGame.setOnClickListener {
             setTab(SettingsModel.Tab.SINGLE)
         }
-        btnRemoteLaunch.setOnClickListener {
-            setTab(SettingsModel.Tab.REMOTE_CREATE)
-        }
-        btnRemoteConnect.setOnClickListener {
-            setTab(SettingsModel.Tab.REMOTE_CONNECT)
+        btnRemoteGame.setOnClickListener {
+            if (isCreatedRemoveGame)
+                setTab(SettingsModel.Tab.REMOTE_CONNECT)
+            else
+                setTab(SettingsModel.Tab.REMOTE_CREATE)
         }
     }
 
@@ -201,6 +203,12 @@ class SettingsFragment : Fragment() {
         }
         rvGames.adapter = adapter
         adapter.notifyDataSetChanged()
+        btnExit.setOnClickListener {
+            //TODO remove Gamer from server
+            setSubtitle("")
+            isCreatedRemoveGame = false
+            setTab(SettingsModel.Tab.REMOTE_CREATE)
+        }
         btnRefresh.setOnClickListener {
             loadingGames()
         }
@@ -218,13 +226,14 @@ class SettingsFragment : Fragment() {
         initFieldSize(sbFieldsize, tvFieldsize)
         initLevel()
         initNickInput(tilNick, etNick)
-        btnCreate.setOnClickListener {
+        btnStart.setOnClickListener {
+            setSubtitle(getString(R.string.wait_opponent))
             model.launchGame(
                 fieldSize = sbFieldsize.progress,
                 nick = etNick.text.toString(),
                 level = sbLevel.progress
             )
-            //    requireActivity().onBackPressed()
+            isCreatedRemoveGame = true
             setTab(SettingsModel.Tab.REMOTE_CONNECT)
         }
     }
@@ -239,6 +248,7 @@ class SettingsFragment : Fragment() {
             model.setFirst(false)
         }
         btnStart.setOnClickListener {
+            setSubtitle("")
             model.launchGame(
                 fieldSize = sbFieldsize.progress,
                 beginAsFirst = btnFirst.isChecked
