@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/big_indent"
-        android:text="@string/begin_as"
+        android:text="@string/play_as"
         android:gravity="center_vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/bg_begin_as"
@@ -31,14 +31,14 @@
             style="@style/ButtonCheck"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/first" />
+            android:text="@string/begin_as_first" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_second"
             style="@style/ButtonCheck"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/second" />
+            android:text="@string/begin_as_second" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>
 

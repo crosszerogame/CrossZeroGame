@@ -38,6 +38,7 @@ class SettingsFragment : Fragment() {
 
     private var binding: FragmentSettingsBinding? = null
     private lateinit var adapter: OpponentsAdapter
+    private var isCreatedRemoveGame = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,7 +54,7 @@ class SettingsFragment : Fragment() {
 
         if (savedInstanceState == null) {
             binding?.run {
-                btnSingleLaunch.isChecked = true
+                btnSingleGame.isChecked = true
                 containerRemoteLaunch.root.visibility = View.GONE
                 containerRemoteConnect.root.visibility = View.GONE
             }
@@ -123,7 +124,7 @@ class SettingsFragment : Fragment() {
 
     private fun showNick(isAvailable: Boolean) = binding?.run {
 
-        containerRemoteLaunch.btnCreate.isEnabled = isAvailable
+        containerRemoteLaunch.btnStart.isEnabled = isAvailable
         if (isAvailable) {
             containerRemoteLaunch.tilNick.error = null
             if (containerRemoteConnect.pbLoad.visibility == View.GONE)
@@ -143,14 +144,14 @@ class SettingsFragment : Fragment() {
     }
 
     private fun initSections() = binding?.run {
-        btnSingleLaunch.setOnClickListener {
+        btnSingleGame.setOnClickListener {
             setTab(SettingsModel.Tab.SINGLE)
         }
-        btnRemoteLaunch.setOnClickListener {
-            setTab(SettingsModel.Tab.REMOTE_CREATE)
-        }
-        btnRemoteConnect.setOnClickListener {
-            setTab(SettingsModel.Tab.REMOTE_CONNECT)
+        btnRemoteGame.setOnClickListener {
+            if (isCreatedRemoveGame)
+                setTab(SettingsModel.Tab.REMOTE_CONNECT)
+            else
+                setTab(SettingsModel.Tab.REMOTE_CREATE)
         }
     }
 
@@ -201,6 +202,11 @@ class SettingsFragment : Fragment() {
         }
         rvGames.adapter = adapter
         adapter.notifyDataSetChanged()
+        btnExit.setOnClickListener {
+            //TODO remove Gamer from server
+            isCreatedRemoveGame = false
+            setTab(SettingsModel.Tab.REMOTE_CREATE)
+        }
         btnRefresh.setOnClickListener {
             loadingGames()
         }
@@ -218,13 +224,13 @@ class SettingsFragment : Fragment() {
         initFieldSize(sbFieldsize, tvFieldsize)
         initLevel()
         initNickInput(tilNick, etNick)
-        btnCreate.setOnClickListener {
+        btnStart.setOnClickListener {
             model.launchGame(
                 fieldSize = sbFieldsize.progress,
                 nick = etNick.text.toString(),
                 level = sbLevel.progress
             )
-            //    requireActivity().onBackPressed()
+            isCreatedRemoveGame = true
             setTab(SettingsModel.Tab.REMOTE_CONNECT)
         }
     }

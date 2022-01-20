@@ -4,9 +4,9 @@
     <!-- Paste BOTH strings as required -->
     <string name="back4app_app_id">EAWN0NncaWQOTxYyzwOurVJIC93MqVC5guOlDDpZ</string>
     <string name="back4app_client_key">XwhpH0NaenpDqF7vFjilu4KCBUznOKAwggwb52Xh</string>
-    <string name="begin_as">Начинать</string>
-    <string name="first">первым</string>
-    <string name="second">вторым</string>
+    <string name="play_as">Играть</string>
+    <string name="begin_as_first">за крестики</string>
+    <string name="begin_as_second">за нолики</string>
     <string name="field_size">Размер поля %d на %d, для победы: %d</string>
     <string name="start">Начать</string>
     <string name="settings">Настройки</string>
@@ -16,10 +16,8 @@
     <string name="aborted_game">Игра прервана</string>
     <string name="wait_opponent">Ожидание хода противника</string>
     <string name="single_game">Одиночная игра</string>
-    <string name="create_remote">Создать сетевую</string>
-    <string name="connect">Подключиться</string>
+    <string name="remote_game">Сетевая игра</string>
     <string name="nick">Никнейм</string>
-    <string name="create">Создать</string>
     <string name="error">Ошибка:&#160;</string>
     <string name="game_level">Уровень игры: %d</string>
     <string name="unavailable_nick">Недоступный ник</string>
@@ -29,4 +27,5 @@
     <string name="no">X</string>
     <string name="cross">X</string>
     <string name="zero">O</string>
+    <string name="remote_game_tip">Ожидайте заявку на игру или подайте сами:</string>
 </resources>

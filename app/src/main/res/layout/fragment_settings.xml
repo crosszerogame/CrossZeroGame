@@ -18,29 +18,23 @@
             android:layout_marginTop="@dimen/normal_indent"
             android:paddingStart="@dimen/normal_indent"
             android:paddingEnd="@dimen/normal_indent"
+            android:layout_marginBottom="-6dp"
             app:selectionRequired="true"
             app:singleSelection="true">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_single_launch"
+                android:id="@+id/btn_single_game"
                 style="@style/ButtonCheck"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/single_game" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_remote_launch"
+                android:id="@+id/btn_remote_game"
                 style="@style/ButtonCheck"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/create_remote" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_remote_connect"
-                style="@style/ButtonCheck"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/connect" />
+                android:text="@string/remote_game" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
     </HorizontalScrollView>
