@@ -19,7 +19,7 @@ class SettingsModel : ViewModel() {
         private const val SHIFT_SIZE = 3
         private const val SHIFT_LEVEL = 1
         private const val MIN_LENGTH_NICK = 3
-        private const val MAX_LENGTH_NICK = 20
+        private const val MAX_LENGTH_NICK = 15
         private const val TIME_FOR_FILTER = 2000L
         private val DEFAULT_TAB = Tab.SINGLE
         private const val NICK_FORMAT = "^[\\w\\s]+\$"
