@@ -25,7 +25,8 @@
     <string name="unavailable_nick">Недоступный ник</string>
     <string name="wait_cross">Ожидается игрок за Крестики</string>
     <string name="wait_zero">Ожидается игрок за Нолики</string>
-    <string name="opponent_info">%s %s %sx%s уровень %s</string>
-    <string name="cross">+</string>
-    <string name="zero">o</string>
+    <string name="opponent_info">Заявка: %s за %s, %dx%d, уровень %d</string>
+    <string name="no">X</string>
+    <string name="cross">X</string>
+    <string name="zero">O</string>
 </resources>

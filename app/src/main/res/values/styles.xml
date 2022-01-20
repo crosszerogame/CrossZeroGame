@@ -31,4 +31,8 @@
         <item name="android:inputType">textCapWords</item>
         <item name="android:imeOptions">actionGo</item>
     </style>
+
+    <style name="SnackbarStyle" parent="Widget.MaterialComponents.Button.TextButton.Snackbar">
+        <item name="android:layout_marginStart">@dimen/normal_indent</item>
+    </style>
 </resources>
