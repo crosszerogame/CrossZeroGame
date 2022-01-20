@@ -28,6 +28,7 @@ class GameFragment : Fragment(), BackEvent {
 
     private var messageBar: Snackbar? = null
     var onMessageAction: (() -> Unit)? = null
+    var onHideBottom: (() -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,9 +62,10 @@ class GameFragment : Fragment(), BackEvent {
                     cancel()
                 }
             }
+
             override fun onFinish() {
                 resizeField(model.fieldSize)
-  //              restoreField()
+                //              restoreField()
                 model.readyField()
                 rvField.visibility = View.VISIBLE
             }
@@ -91,6 +93,7 @@ class GameFragment : Fragment(), BackEvent {
             cellSize = countCellSize(linear, fieldSize),
             linear = linear
         ) { x, y ->
+            onHideBottom?.invoke()
             model.doMove(x, y)
         }
         rvField.adapter = adapter
@@ -167,13 +170,13 @@ class GameFragment : Fragment(), BackEvent {
 
     private fun showMessageNewGame(stringMsg: String) {
         messageBar = Snackbar.make(rvField, stringMsg, Snackbar.LENGTH_INDEFINITE)
-            messageBar?.setAction(android.R.string.ok) {
-                initField()
-                dismissMessage()
-            }?.addAction(R.layout.snackbar_extra_button, R.string.no) {
-                model.abortGame()
-                dismissMessage()
-            }
+        messageBar?.setAction(android.R.string.ok) {
+            initField()
+            dismissMessage()
+        }?.addAction(R.layout.snackbar_extra_button, R.string.no) {
+            model.abortGame()
+            dismissMessage()
+        }
         messageBar?.show()
     }
 
