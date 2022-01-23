@@ -29,13 +29,6 @@
                 android:text="@string/single_game" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_remote_launch"
-                style="@style/ButtonCheck"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/create_remote" />
-
-            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_remote_connect"
                 style="@style/ButtonCheck"
                 android:layout_width="wrap_content"
@@ -58,10 +51,6 @@
         <include
             android:id="@+id/container_single_launch"
             layout="@layout/layout_single_launcher" />
-
-        <include
-            android:id="@+id/container_remote_launch"
-            layout="@layout/layout_remote_launcher" />
 
         <include
             android:id="@+id/container_remote_connect"

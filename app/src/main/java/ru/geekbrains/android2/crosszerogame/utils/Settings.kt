@@ -1,5 +1,8 @@
 package ru.geekbrains.android2.crosszerogame.utils
 
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants
+import ru.geekbrains.android2.crosszerogame.xdata.Gamer
+
 interface Settings {
     fun save()
     fun getBeginAsFirst(): Boolean
@@ -8,6 +11,10 @@ interface Settings {
     fun setFieldSize(value: Int)
     fun getNick(): String
     fun setNick(value: String)
-    fun getGameLevel(): Int
-    fun setGameLevel(value: Int)
+    fun getGameLevel(): GameConstants.GameLevel
+    fun setGameLevel(value: GameConstants.GameLevel)
+    fun getOnline(): Boolean
+    fun setOnline(value: Boolean)
+    fun getGamer(): Gamer
+    fun setGamer(value: Gamer)
 }

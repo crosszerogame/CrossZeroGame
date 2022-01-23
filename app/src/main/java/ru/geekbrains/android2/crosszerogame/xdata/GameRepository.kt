@@ -2,11 +2,7 @@ package ru.geekbrains.android2.crosszerogame.xdata
 
 interface GameRepository {
     suspend fun gamer(
-        nikGamer: String = "gamer",
-        gameFieldSize: Int = GameConstants.MIN_FIELD_SIZE,
-        levelGamer: Int = 1,
-        chipImageId: Int = 0,
-        timeForTurn: Int = GameConstants.MIN_TIME_FOR_TURN,
+       gamer: Gamer
     ): Gamer
 
     suspend fun getOpponent(): Gamer?

@@ -1,13 +1,11 @@
 package ru.geekbrains.android2.crosszerogame.viewmodel
 
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants
 import ru.geekbrains.android2.crosszerogame.xdata.Gamer
 
 sealed class SettingsState {
     data class Settings(
-        val beginAsFirst: Boolean,
-        val fieldSize: Int,
-        val nick: String,
-        val gameLevel: Int
+        val gamer: Gamer
     ) : SettingsState()
 
     object AvailableNick : SettingsState()

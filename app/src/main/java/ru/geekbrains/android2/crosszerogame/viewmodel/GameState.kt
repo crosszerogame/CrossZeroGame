@@ -7,7 +7,7 @@ sealed class GameState {
         val remoteOpponent: Boolean,
         val fieldSize: Int,
         val nikOpponent: String = "",
-        val levelOpponent: Int = GameConstants.DEFAULT_LEVEL_GAMER,
+        val levelOpponent: GameConstants.GameLevel = GameConstants.DEFAULT_LEVEL_GAMER,
         val opponentIsFirst: Boolean
     ) : GameState()
 

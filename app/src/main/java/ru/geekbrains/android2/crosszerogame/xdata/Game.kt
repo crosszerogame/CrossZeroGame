@@ -1,5 +1,6 @@
 package ru.geekbrains.android2.crosszerogame.xdata
 
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DEFAULT_FIELD_SIZE
 import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN1
 import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN1_SIZE1
 import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.DOTS_TO_WIN1_SIZE2

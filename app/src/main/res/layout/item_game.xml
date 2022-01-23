@@ -28,7 +28,7 @@
             android:layout_width="100dp"
             android:layout_height="20dp"
             android:layout_marginStart="@dimen/normal_indent"
-            android:max="5"
+            android:max="3"
             android:progress="0"
             android:progressDrawable="@drawable/level_bar"
             app:layout_constraintEnd_toEndOf="parent"

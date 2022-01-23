@@ -17,8 +17,14 @@ object GameConstants {
     const val REFRESH_INTERVAL_MS_GET_OPPONENT = 2000L
     const val REFRESH_INTERVAL_MS_GAME = 1000L
     const val REFRESH_INTERVAL_MS_OPPONENTS_LIST = 3000L
-    const val DEFAULT_LEVEL_GAMER = 1
     const val MAX_ATTEMPTS_PUT_DATA_TO_SERVER = 10
+    const val CLASS_GAMER = "Gamer"
+    const val CLASS_GAME = "Game"
+    val DEFAULT_LEVEL_GAMER = GameLevel.LOW
+    const val DEFAULT_NICK_GAMER = "Gamer"
+    const val DEFAULT_IS_FIRST = true
+    const val DEFAULT_FIELD_SIZE = MIN_FIELD_SIZE
+    const val DEFAULT_TIME_FOR_TURN = MIN_TIME_FOR_TURN
 
     enum class CellField {
         GAMER, OPPONENT, EMPTY
@@ -34,5 +40,11 @@ object GameConstants {
         NEW_GAME_FIRST_GAMER,
         NEW_GAME_FIRST_OPPONENT,
         NEW_GAME_ACCEPT
+    }
+
+    enum class GameLevel {
+        LOW,
+        MIDDLE,
+        HIGH
     }
 }

@@ -1,6 +1,6 @@
 package ru.geekbrains.android2.crosszerogame.xdata.ai
 
-import ru.geekbrains.android2.crosszerogame.xdata.*
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants
 
 class AI() {
     private var SIZE = GameConstants.MIN_FIELD_SIZE
@@ -198,30 +198,32 @@ class AI() {
 // при равных значениях stepOmax выбирает элемент с максимальным количеством проставленных фищек, входящих в победные комбинации - freedomWithFrOmax,
 // при равных значениях freedomWithFrOmax выбирает элемент с максимальным количествоv победных комбинаций - freedomOmax
 // для хода, если  stepOmax >= stepXmax, выбирается лучший элемент для себя, иначе выбирается лучший элемент для противника
-    fun aiTurn(): Pair<Int, Int> {
+    fun aiTurn(level: Int = 2): Pair<Int, Int> {
         val x: Int
         val y: Int
-        var stepX: Int
-        var stepO: Int
-        var stepXmax: Int
-        var stepOmax: Int
+        var stepX = 0
+        var stepO = 0
+        var stepXmax = 0
+        var stepOmax = 0
         var xX = 0
         var yX = 0
         var xO = 0
         var yO = 0
-        var freedomXmax: Int
-        var freedomOmax: Int
-        var freedomWithFrXmax: Int
-        var freedomWithFrOmax: Int
-        stepXmax = 0
-        freedomXmax = 0
-        stepOmax = 0
-        freedomOmax = 0
-        freedomWithFrXmax = 0
-        freedomWithFrOmax = 0
+        var freedomXmax = 0
+        var freedomOmax = 0
+        var freedomWithFrXmax = 0
+        var freedomWithFrOmax = 0
+        var firstEmpty = true
         for (i in 0 until SIZE) {
             for (j in 0 until SIZE) {
                 if (map[i][j] == DOT_EMPTY) {
+                    if (firstEmpty) {
+                        xX = j
+                        yX = i
+                        xO = j
+                        yO = i
+                        firstEmpty = false
+                    }
                     stepX = calcStep(DOT_X, j, i)
                     if (stepX > stepXmax) {
                         stepXmax = stepX
@@ -229,12 +231,12 @@ class AI() {
                         freedomWithFrXmax = freedomWithFr
                         xX = j
                         yX = i
-                    } else if (stepX == stepXmax && freedomWithFr > freedomWithFrXmax) {
+                    } else if (level >= 1 && stepX == stepXmax && freedomWithFr > freedomWithFrXmax) {
                         freedomWithFrXmax = freedomWithFr
                         freedomXmax = freedom
                         xX = j
                         yX = i
-                    } else if (stepX == stepXmax && freedomWithFr == freedomWithFrXmax && freedom > freedomXmax) {
+                    } else if (level >= 2 && stepX == stepXmax && freedomWithFr == freedomWithFrXmax && freedom > freedomXmax) {
                         freedomXmax = freedom
                         xX = j
                         yX = i
@@ -245,12 +247,12 @@ class AI() {
                         freedomOmax = freedom
                         xO = j
                         yO = i
-                    } else if (stepO == stepOmax && freedomWithFr > freedomWithFrOmax) {
+                    } else if (level >= 1 && stepO == stepOmax && freedomWithFr > freedomWithFrOmax) {
                         freedomWithFrOmax = freedomWithFr
                         freedomOmax = freedom
                         xO = j
                         yO = i
-                    } else if (stepO == stepOmax && freedomWithFr == freedomWithFrOmax && freedom > freedomOmax) {
+                    } else if (level >= 2 && stepO == stepOmax && freedomWithFr == freedomWithFrOmax && freedom > freedomOmax) {
                         freedomOmax = freedom
                         xO = j
                         yO = i

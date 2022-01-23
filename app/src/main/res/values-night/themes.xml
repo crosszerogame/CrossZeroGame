@@ -16,5 +16,6 @@
         <item name="translucent_bg">@color/translucent_black</item>
         <item name="materialButtonStyle">@style/ButtonStyle</item>
         <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="snackbarButtonStyle">@style/SnackbarStyle</item>
     </style>
 </resources>

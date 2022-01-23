@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.layout_remote_connector.*
 import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.xdata.Gamer
@@ -25,11 +26,12 @@ import ru.geekbrains.android2.crosszerogame.utils.strings.SettingsStrings
 import ru.geekbrains.android2.crosszerogame.view.list.OpponentsAdapter
 import ru.geekbrains.android2.crosszerogame.viewmodel.SettingsModel
 import ru.geekbrains.android2.crosszerogame.viewmodel.SettingsState
+import ru.geekbrains.android2.crosszerogame.xdata.GameConstants
 
 class SettingsFragment : Fragment() {
     companion object {
         private const val DEFAULT_SIZE = 0
-        private const val DEFAULT_LEVEL = 2
+        private const val SHIFT_SIZE = 3
     }
 
     private val model: SettingsModel by lazy {
@@ -54,7 +56,6 @@ class SettingsFragment : Fragment() {
         if (savedInstanceState == null) {
             binding?.run {
                 btnSingleLaunch.isChecked = true
-                containerRemoteLaunch.root.visibility = View.GONE
                 containerRemoteConnect.root.visibility = View.GONE
             }
         } else
@@ -62,7 +63,6 @@ class SettingsFragment : Fragment() {
 
         initSections()
         initSingleLaunch()
-        initRemoteLaunch()
         initRemoteConnect()
     }
 
@@ -92,7 +92,6 @@ class SettingsFragment : Fragment() {
     private fun showOpponents(games: List<Gamer>) {
         binding?.containerRemoteConnect?.run {
             pbLoad.visibility = View.GONE
-//            if (tilNick.error == null)
             vBlock.visibility = View.GONE
         }
         adapter.setItems(games)
@@ -100,36 +99,32 @@ class SettingsFragment : Fragment() {
 
     private fun loadSettings(state: SettingsState.Settings) = binding?.run {
         with(containerSingleLaunch) {
-            if (state.beginAsFirst)
+            if (state.gamer.isFirst)
                 btnFirst.isChecked = true
             else
                 btnSecond.isChecked = true
-            sbFieldsize.progress = state.fieldSize
-        }
-        with(containerRemoteLaunch) {
-            etNick.setText(state.nick)
-            etNick.setSelection(state.nick.length)
-            sbFieldsize.progress = state.fieldSize
-            sbLevel.progress = state.gameLevel
-        }
-        with(containerRemoteConnect) {
-            if (state.beginAsFirst)
-                btnFirst.isChecked = true
+            sbFieldsize.progress = state.gamer.gameFieldSize - SHIFT_SIZE
+            sbLevel.progress = state.gamer.levelGamer.ordinal
+            etNick.setText(state.gamer.nikGamer)
+            etNick.setSelection(state.gamer.nikGamer.length)
+            sbLevel.progress = state.gamer.levelGamer.ordinal
+            if (state.gamer.isOnLine)
+                btnHuman.isChecked = true
             else
-                btnSecond.isChecked = true
+                btnAi.isChecked = true
+
         }
-        model.checkNick(state.nick)
+        model.checkNick(state.gamer.nikGamer)
     }
 
     private fun showNick(isAvailable: Boolean) = binding?.run {
-
-        containerRemoteLaunch.btnCreate.isEnabled = isAvailable
+        containerSingleLaunch.btnStart.isEnabled = isAvailable
         if (isAvailable) {
-            containerRemoteLaunch.tilNick.error = null
+            containerSingleLaunch.tilNick.error = null
             if (containerRemoteConnect.pbLoad.visibility == View.GONE)
                 containerRemoteConnect.vBlock.visibility = View.GONE
         } else {
-            containerRemoteLaunch.tilNick.error = getString(R.string.unavailable_nick)
+            containerSingleLaunch.tilNick.error = getString(R.string.unavailable_nick)
             containerRemoteConnect.vBlock.visibility = View.VISIBLE
         }
     }
@@ -146,9 +141,6 @@ class SettingsFragment : Fragment() {
         btnSingleLaunch.setOnClickListener {
             setTab(SettingsModel.Tab.SINGLE)
         }
-        btnRemoteLaunch.setOnClickListener {
-            setTab(SettingsModel.Tab.REMOTE_CREATE)
-        }
         btnRemoteConnect.setOnClickListener {
             setTab(SettingsModel.Tab.REMOTE_CONNECT)
         }
@@ -159,31 +151,18 @@ class SettingsFragment : Fragment() {
         when (tab) {
             SettingsModel.Tab.SINGLE -> {
                 containerSingleLaunch.root.visibility = View.VISIBLE
-                containerRemoteLaunch.root.visibility = View.GONE
-                containerRemoteConnect.root.visibility = View.GONE
-            }
-            SettingsModel.Tab.REMOTE_CREATE -> {
-                containerSingleLaunch.root.visibility = View.GONE
-                containerRemoteLaunch.root.visibility = View.VISIBLE
                 containerRemoteConnect.root.visibility = View.GONE
             }
             SettingsModel.Tab.REMOTE_CONNECT -> {
                 containerSingleLaunch.root.visibility = View.GONE
-                containerRemoteLaunch.root.visibility = View.GONE
                 containerRemoteConnect.root.visibility = View.VISIBLE
                 loadingGames()
             }
         }
     }
 
-    private fun initRemoteConnect() = binding?.containerRemoteConnect?.run {
-        btnFirst.isChecked = true
-        btnFirst.setOnClickListener {
-            model.setFirst(true)
-        }
-        btnSecond.setOnClickListener {
-            model.setFirst(false)
-        }
+    private fun initRemoteConnect() = binding?.run {
+
         adapter = OpponentsAdapter(
             strings = GameStrings(
                 fieldSizeFormat = getString(R.string.field_size),
@@ -192,16 +171,13 @@ class SettingsFragment : Fragment() {
             )
         ) { opponent ->
             model.launchGame(
-                keyOpponent = opponent.keyGamer,
-                beginAsFirst = btnFirst.isChecked,
-                nikOpponent = opponent.nikGamer,
-                levelOpponent = opponent.levelGamer
+                opponent
             )
             requireActivity().onBackPressed()
         }
-        rvGames.adapter = adapter
+        containerRemoteConnect.rvGames.adapter = adapter
         adapter.notifyDataSetChanged()
-        btnRefresh.setOnClickListener {
+        containerRemoteConnect.btnRefresh.setOnClickListener {
             loadingGames()
         }
     }
@@ -214,37 +190,34 @@ class SettingsFragment : Fragment() {
         model.loadOpponents()
     }
 
-    private fun initRemoteLaunch() = binding?.containerRemoteLaunch?.run {
-        initFieldSize(sbFieldsize, tvFieldsize)
-        initLevel()
-        initNickInput(tilNick, etNick)
-        btnCreate.setOnClickListener {
-            model.launchGame(
-                fieldSize = sbFieldsize.progress,
-                nick = etNick.text.toString(),
-                level = sbLevel.progress
-            )
-            //    requireActivity().onBackPressed()
-            setTab(SettingsModel.Tab.REMOTE_CONNECT)
-        }
-    }
-
     private fun initSingleLaunch() = binding?.containerSingleLaunch?.run {
-        btnFirst.isChecked = true
         initFieldSize(sbFieldsize, tvFieldsize)
+        initLevel(sbLevel, tvLevel)
+        initNickInput(tilNick, etNick)
+
         btnFirst.setOnClickListener {
             model.setFirst(true)
         }
         btnSecond.setOnClickListener {
             model.setFirst(false)
         }
-        btnStart.setOnClickListener {
-            model.launchGame(
-                fieldSize = sbFieldsize.progress,
-                beginAsFirst = btnFirst.isChecked
-            )
-            requireActivity().onBackPressed()
+        btnAi.setOnClickListener {
+            model.setOnline(false)
         }
+        btnHuman.setOnClickListener {
+            model.setOnline(true)
+        }
+        binding?.run {
+            btnStart.setOnClickListener {
+                model.launchGame()
+                if (btnAi.isChecked) requireActivity().onBackPressed()
+                else {
+                    btnRemoteConnect.isChecked = true
+                    setTab(SettingsModel.Tab.REMOTE_CONNECT)
+                }
+            }
+        }
+
     }
 
     private fun initNickInput(til: TextInputLayout, et: EditText) {
@@ -273,22 +246,22 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun initLevel() = binding?.containerRemoteLaunch?.run {
-        sbLevel.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+    private fun initLevel(sb: SeekBar, tv: TextView) {
+        sb.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, v: Int, b: Boolean) {
-                tvLevel.text = model.getGameLevelString(v)
+                tv.text = model.getGameLevelString(v)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
-        sbLevel.progress = DEFAULT_LEVEL
+        sb.progress = DEFAULT_SIZE
     }
 
     private fun initFieldSize(sb: SeekBar, tv: TextView) {
         sb.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, v: Int, b: Boolean) {
-                tv.text = model.getFieldSizeString(v)
+                tv.text = model.getFieldSizeString(v + SHIFT_SIZE)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -299,7 +272,6 @@ class SettingsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        model.save()
         binding = null
     }
 }

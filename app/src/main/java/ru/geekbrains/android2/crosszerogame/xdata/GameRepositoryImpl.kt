@@ -21,22 +21,19 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
     var flowGetOpponentIsOn = false
 
     override suspend fun gamer(
-        nikGamer: String,
-        gameFieldSize: Int,
-        levelGamer: Int,
-        chipImageId: Int,
-        timeForTurn: Int,
+        gamer: Gamer
     ): Gamer {
         currentGamer = Gamer(
-            keyGamer = currentGamer.keyGamer,
-            nikGamer = nikGamer,
-            gameFieldSize = gameFieldSize,
-            levelGamer = levelGamer,
-            chipImageId = chipImageId,
-            timeForTurn = timeForTurn,
-            keyOpponent = currentGamer.keyOpponent,
-            keyGame = currentGamer.keyGame,
-            isOnLine = true
+            keyGamer = gamer.keyGamer,
+            nikGamer = gamer.nikGamer,
+            gameFieldSize = gamer.gameFieldSize,
+            levelGamer = gamer.levelGamer,
+            chipImageId = gamer.chipImageId,
+            timeForTurn = gamer.timeForTurn,
+            keyOpponent = gamer.keyOpponent,
+            keyGame = gamer.keyGame,
+            isOnLine = gamer.isOnLine,
+            isFirst = gamer.isFirst
         )
         if (remoteOpponentGame) currentGamer = rg.gamerRemote(currentGamer) ?: currentGamer
         return currentGamer
@@ -80,12 +77,12 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
 
     override suspend fun setOpponent(key: String, gameStatus: GameConstants.GameStatus): Game? {
         currentGamer.keyOpponent = key
-        var gm:Game?=null
+        var gm: Game? = null
         if (remoteOpponentGame) {
             if (rg.setOpponentRemote(currentGamer)) {
                 if (currentGamer.keyOpponent != "") {
                     flowGetOpponentIsOn = false
-                    gm= game(
+                    gm = game(
                         gameStatus = gameStatus
                     )
                 }
@@ -110,7 +107,7 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
                 motionYIndex = motionYIndex,
                 gameStatus = gameStatus
             )
-            if (game.motionXIndex>=0) emit(Pair(true, game))
+            if (game.motionXIndex >= 0) emit(Pair(true, game))
         }
         while (!currentGame.turnOfGamer) {
             game = game(
@@ -118,7 +115,7 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
                 motionYIndex = motionYIndex,
                 gameStatus = gameStatus
             )
-            if (currentGame.turnOfGamer && game.motionXIndex>=0) emit(Pair(false, game))
+            if (currentGame.turnOfGamer && game.motionXIndex >= 0) emit(Pair(false, game))
             kotlinx.coroutines.delay(GameConstants.REFRESH_INTERVAL_MS_GAME)
         }
     }
@@ -131,158 +128,6 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
         if (remoteOpponentGame)
             gameHuman(motionXIndex, motionYIndex, gameStatus)
         else gameAi(motionXIndex, motionYIndex, gameStatus)
-
-    suspend fun gameOLD(
-        motionXIndex: Int,
-        motionYIndex: Int,
-        gameStatus: GameConstants.GameStatus
-    ): Game {
-        if (!remoteOpponentGame) {
-            return gameAi(motionXIndex, motionYIndex, gameStatus)
-        } else {
-
-            if (gameStatus == GameConstants.GameStatus.NEW_GAME ||
-                gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_GAMER ||
-                gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT ||
-                gameStatus == GameConstants.GameStatus.NEW_GAME_ACCEPT
-            ) {
-                if (remoteOpponentGame) {
-                    if (gameStatus == GameConstants.GameStatus.NEW_GAME_ACCEPT) {
-                        val opponentGame = rg.getGameOpponentRemote(currentGamer)
-                        if (opponentGame != null) {
-                            initGame(
-                                gameStatusOld = opponentGame.gameStatus,
-                                gameStatusNew = GameConstants.GameStatus.GAME_IS_ON,
-                                previousGameStatus = currentGame.gameStatus,
-                                gameFieldSizeNew = opponentGame.gameFieldSize
-                            )
-                            countTurnOpponent = opponentGame.countOfTurn
-                        } else currentGame.gameStatus = GameConstants.GameStatus.ABORTED_GAME
-
-                    } else {
-                        initGame(
-                            gameStatusOld = gameStatus,
-                            gameStatusNew = gameStatus,
-                            previousGameStatus = currentGame.gameStatus,
-                            gameFieldSizeNew = currentGamer.gameFieldSize
-                        )
-                        countTurnGamer = 1
-                        currentGame.countOfTurn = countTurnGamer
-                        rg.setGameOpponentRemote(
-                            currentGamer,
-                            currentGame
-                        )
-                        currentGame.gameStatus = GameConstants.GameStatus.GAME_IS_ON
-                    }
-                    return currentGame
-                } else {
-                    initGame(
-                        gameStatusOld = gameStatus,
-                        gameStatusNew = GameConstants.GameStatus.GAME_IS_ON,
-                        previousGameStatus = currentGame.gameStatus,
-                        gameFieldSizeNew = currentGamer.gameFieldSize
-                    )
-                    currentGamer.gameFieldSize = currentGame.gameFieldSize
-                    if (currentGame.turnOfGamer) return currentGame
-                }
-
-            }
-
-            if ((gameStatus == GameConstants.GameStatus.GAME_IS_ON &&
-                        currentGame.gameStatus !in arrayOf(
-                    GameConstants.GameStatus.WIN_GAMER,
-                    GameConstants.GameStatus.DRAWN_GAME,
-                    GameConstants.GameStatus.WIN_OPPONENT,
-                    GameConstants.GameStatus.ABORTED_GAME
-                ))
-                ||
-                gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT ||
-                (gameStatus == GameConstants.GameStatus.NEW_GAME && !currentGame.turnOfGamer)
-            ) {
-                currentGame.gameStatus = GameConstants.GameStatus.GAME_IS_ON
-
-                if (currentGame.turnOfGamer) {
-                    if (!checkHumanTurn(motionXIndex, motionYIndex, true)) return currentGame
-                    if (ai.checkWin(motionXIndex, motionYIndex, currentGame.turnOfGamer)) {
-                        currentGame.motionXIndex = motionXIndex
-                        currentGame.motionYIndex = motionYIndex
-                        if (remoteOpponentGame) {
-                            currentGame.countOfTurn = ++countTurnGamer
-                            rg.setGameOpponentRemote(currentGamer, currentGame)
-                        }
-                        currentGame.gameStatus = GameConstants.GameStatus.WIN_GAMER
-                        return currentGame
-                    }
-                    if (ai.isMapFull()) {
-                        currentGame.motionXIndex = motionXIndex
-                        currentGame.motionYIndex = motionYIndex
-                        if (remoteOpponentGame) {
-                            currentGame.countOfTurn = ++countTurnGamer
-                            rg.setGameOpponentRemote(currentGamer, currentGame)
-                        }
-                        currentGame.gameStatus = GameConstants.GameStatus.DRAWN_GAME
-                        return currentGame
-                    }
-
-                    if (remoteOpponentGame) {
-                        currentGame.motionXIndex = motionXIndex
-                        currentGame.motionYIndex = motionYIndex
-                        currentGame.countOfTurn = ++countTurnGamer
-                        rg.setGameOpponentRemote(currentGamer, currentGame)
-                        currentGame.turnOfGamer = !currentGame.turnOfGamer
-                        currentGame.motionXIndex = -1
-                        currentGame.motionYIndex = -1
-                        return currentGame
-                    }
-                    currentGame.turnOfGamer = !currentGame.turnOfGamer
-                }
-                if (!currentGame.turnOfGamer) {
-                    if (remoteOpponentGame) {
-                        //         currentGame.revertField()   ///??????????? HZ
-                        val opponentGame = rg.getGameOpponentRemote(currentGamer)
-                        if (opponentGame != null) {
-                            if (opponentGame.countOfTurn > countTurnOpponent) {
-                                countTurnOpponent = opponentGame.countOfTurn
-
-                                if (checkHumanTurn(
-                                        opponentGame.motionXIndex,
-                                        opponentGame.motionYIndex,
-                                        false
-                                    )
-                                ) {
-                                    currentGame.gameStatus = opponentGame.gameStatus
-                                } else return currentGame
-                            } else return currentGame
-                        } else return currentGame
-
-                    } else aiTurn()
-
-                    if (ai.checkWin(
-                            currentGame.motionXIndex,
-                            currentGame.motionYIndex,
-                            currentGame.turnOfGamer
-                        )
-                    ) {
-                        currentGame.gameStatus = GameConstants.GameStatus.WIN_OPPONENT
-                        //     if (remoteOpponentGame) rg.setGameOpponentRemote(currentGamer, currentGame)
-                        currentGame.turnOfGamer = !currentGame.turnOfGamer
-                        return currentGame
-                    }
-                    if (ai.isMapFull()) {
-                        currentGame.gameStatus = GameConstants.GameStatus.DRAWN_GAME
-                        //         if (remoteOpponentGame) rg.setGameOpponentRemote(currentGamer, currentGame)
-                        currentGame.turnOfGamer = !currentGame.turnOfGamer
-                        return currentGame
-                    }
-                    currentGame.turnOfGamer = !currentGame.turnOfGamer
-                }
-                return currentGame
-            }
-            currentGame.gameStatus = GameConstants.GameStatus.ABORTED_GAME
-            if (remoteOpponentGame) rg.setGameOpponentRemote(currentGamer, currentGame)
-            return currentGame
-        }
-    }
 
     private suspend fun gameHuman(
         motionXIndex: Int,
@@ -315,11 +160,13 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
                 )
                 countTurnGamer = 1
                 currentGame.countOfTurn = countTurnGamer
-                rg.setGameOpponentRemote(
-                    currentGamer,
-                    currentGame
+                if (rg.setGameOpponentRemote(
+                        currentGamer,
+                        currentGame
+                    )
                 )
-                currentGame.gameStatus = GameConstants.GameStatus.GAME_IS_ON
+                    currentGame.gameStatus = GameConstants.GameStatus.GAME_IS_ON
+                else currentGame.gameStatus = GameConstants.GameStatus.ABORTED_GAME
             }
             return currentGame
         }
@@ -340,17 +187,17 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
             if (currentGame.turnOfGamer) {
                 if (!checkHumanTurn(motionXIndex, motionYIndex, true)) return currentGame
                 currentGame.countOfTurn = ++countTurnGamer
-                rg.setGameOpponentRemote(currentGamer, currentGame)
-                when {
-                    ai.checkWin(motionXIndex, motionYIndex, currentGame.turnOfGamer) ->
-                        currentGame.gameStatus = GameConstants.GameStatus.WIN_GAMER
-                    ai.isMapFull() ->
-                        currentGame.gameStatus = GameConstants.GameStatus.DRAWN_GAME
-                }
+                if (rg.setGameOpponentRemote(currentGamer, currentGame))
+                    when {
+                        ai.checkWin(motionXIndex, motionYIndex, currentGame.turnOfGamer) ->
+                            currentGame.gameStatus = GameConstants.GameStatus.WIN_GAMER
+                        ai.isMapFull() ->
+                            currentGame.gameStatus = GameConstants.GameStatus.DRAWN_GAME
+                    } else currentGame.gameStatus = GameConstants.GameStatus.ABORTED_GAME
             } else {
                 val opponentGame = rg.getGameOpponentRemote(currentGamer)
                 var goodOpponentTurn = false
-                opponentGame?.let {
+                if (opponentGame != null) {
                     if (opponentGame.countOfTurn > countTurnOpponent) {
                         countTurnOpponent = opponentGame.countOfTurn
                         if (checkHumanTurn(
@@ -363,7 +210,7 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
                             goodOpponentTurn = true
                         }
                     }
-                }
+                } else currentGame.gameStatus = GameConstants.GameStatus.ABORTED_GAME
                 if (!goodOpponentTurn) {
                     currentGame.motionXIndex = -1
                     currentGame.motionYIndex = -1
@@ -427,13 +274,14 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
                     ai.isMapFull() ->
                         currentGame.gameStatus = GameConstants.GameStatus.DRAWN_GAME
                 }
+                currentGame.turnOfGamer = !currentGame.turnOfGamer
             }
             if (!currentGame.turnOfGamer && currentGame.gameStatus !in arrayOf(
                     GameConstants.GameStatus.WIN_GAMER,
                     GameConstants.GameStatus.DRAWN_GAME
                 )
             ) {
-                aiTurn()
+                aiTurn(currentGamer.levelGamer)
                 when {
                     ai.checkWin(
                         currentGame.motionXIndex,
@@ -508,9 +356,8 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
         false
     }
 
-
-    private fun aiTurn() {
-        val xy = ai.aiTurn()
+    private fun aiTurn(levelGamer: GameConstants.GameLevel) {
+        val xy = ai.aiTurn(level = levelGamer.ordinal)
         currentGame.motionXIndex = xy.first
         currentGame.motionYIndex = xy.second
         currentGame.gameField[currentGame.motionYIndex][currentGame.motionXIndex] =
