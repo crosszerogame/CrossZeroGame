@@ -3,8 +3,8 @@
     android:layout_width="50dp"
     android:layout_height="50dp"
     android:layout_margin="2dp"
-    android:background="@drawable/cell"
-    android:padding="2dp">
+    android:background="?attr/cell_bg"
+    android:padding="@dimen/normal_indent">
 
     <ImageView
         android:id="@+id/iv_cell"
