@@ -24,8 +24,8 @@ class CellHolder(
         val iv = view.findViewById(R.id.iv_cell) as ImageView
         when (cell) {
             CellValue.EMPTY -> iv.setImageResource(0)
-            CellValue.CROSS -> iv.setImageResource(R.drawable.ic_cross)
-            CellValue.ZERO -> iv.setImageResource(R.drawable.ic_zero)
+            CellValue.CROSS -> iv.setImageResource(R.drawable.cross)
+            CellValue.ZERO -> iv.setImageResource(R.drawable.zero)
         }
         view.setOnClickListener {
             if (cell == CellValue.EMPTY)
