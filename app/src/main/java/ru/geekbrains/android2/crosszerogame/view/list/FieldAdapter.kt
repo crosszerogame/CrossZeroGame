@@ -16,7 +16,7 @@ class FieldAdapter(
     init {
         CellHolder.cellSize = cellSize
         for (i in 0 until fieldSize) {
-            lines.add(LineAdapter(fieldSize, i, linear, onItemClick))
+            lines.add(LineAdapter(i, fieldSize, linear, onItemClick))
         }
     }
 
@@ -51,7 +51,7 @@ class FieldAdapter(
 
     override fun getItemCount() = lines.size
 
-    fun setCell(x: Int, y: Int, value: CellValue) {
+    fun setCell(x: Int, y: Int, value: Cell.Value) {
         if (linear == Linear.HORIZONTAL)
             lines[x].setCell(y, value)
         else
