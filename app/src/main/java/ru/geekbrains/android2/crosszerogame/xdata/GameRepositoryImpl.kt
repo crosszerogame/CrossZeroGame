@@ -1,7 +1,5 @@
 package ru.geekbrains.android2.crosszerogame.xdata
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import ru.geekbrains.android2.crosszerogame.xdata.GameConstants.MIN_TIME_FOR_TURN
 import ru.geekbrains.android2.crosszerogame.xdata.ai.AI
 import ru.geekbrains.android2.crosszerogame.xdata.remote.CrossZeroDB
@@ -39,6 +37,9 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
         return currentGamer
     }
 
+    suspend fun flowGamer(key: String) = rg.gamerLiveQueryRemote(key)
+    suspend fun flowGame(key: String) = rg.gameLiveQueryRemote(key)
+
     override suspend fun getOpponent(): Gamer? {
         return if (remoteOpponentGame) {
             val opponent = rg.getOpponentRemote(currentGamer)
@@ -47,43 +48,15 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
         } else null
     }
 
-    suspend fun flowGetOpponent(): Flow<Pair<Gamer, Game>> = flow {
-        flowGetOpponentIsOn = true
-        while (flowGetOpponentIsOn) {
-            val opponent = getOpponent()
-            opponent?.let { opp ->
-                val game = rg.getGameOpponentRemote(currentGamer)
-                game?.let { gam ->
-                    if (gam.gameStatus in arrayOf(
-                            GameConstants.GameStatus.NEW_GAME,
-                            GameConstants.GameStatus.NEW_GAME_FIRST_GAMER,
-                            GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT
-                        )
-                    ) {
-                        flowGetOpponentIsOn = false
-                        emit(
-                            Pair(
-                                opp, game(
-                                    gameStatus = GameConstants.GameStatus.NEW_GAME_ACCEPT
-                                )
-                            )
-                        )
-                    }
-                }
-            }
-            kotlinx.coroutines.delay(GameConstants.REFRESH_INTERVAL_MS_GET_OPPONENT)
-        }
-    }
-
     override suspend fun setOpponent(key: String, gameStatus: GameConstants.GameStatus): Game? {
         currentGamer.keyOpponent = key
         var gm: Game? = null
         if (remoteOpponentGame) {
             if (rg.setOpponentRemote(currentGamer)) {
                 if (currentGamer.keyOpponent != "") {
-                    flowGetOpponentIsOn = false
+                    currentGame.gameStatus = gameStatus
                     gm = game(
-                        gameStatus = gameStatus
+                        currentGame
                     )
                 }
             }
@@ -95,67 +68,24 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
         if (remoteOpponentGame) rg.opponentsListRemote(currentGamer) ?: listOf()
         else listOf()
 
-    suspend fun flowGame(
-        motionXIndex: Int,
-        motionYIndex: Int,
-        gameStatus: GameConstants.GameStatus
-    ): Flow<Pair<Boolean, Game>> = flow {
-        var game: Game
-        if (currentGame.turnOfGamer) {
-            game = game(
-                motionXIndex = motionXIndex,
-                motionYIndex = motionYIndex,
-                gameStatus = gameStatus
-            )
-            if (game.motionXIndex >= 0) emit(Pair(true, game))
-        }
-        while (!currentGame.turnOfGamer) {
-            game = game(
-                motionXIndex = motionXIndex,
-                motionYIndex = motionYIndex,
-                gameStatus = gameStatus
-            )
-            if (currentGame.turnOfGamer && game.motionXIndex >= 0) emit(Pair(false, game))
-            kotlinx.coroutines.delay(GameConstants.REFRESH_INTERVAL_MS_GAME)
-        }
-    }
-
     override suspend fun game(
-        motionXIndex: Int,
-        motionYIndex: Int,
-        gameStatus: GameConstants.GameStatus
+        toGame: Game
     ): Game =
         if (remoteOpponentGame)
-            gameHuman(motionXIndex, motionYIndex, gameStatus)
-        else gameAi(motionXIndex, motionYIndex, gameStatus)
+            gameHuman(toGame)
+        else gameAi(toGame.motionXIndex, toGame.motionYIndex, toGame.gameStatus)
 
     private suspend fun gameHuman(
-        motionXIndex: Int,
-        motionYIndex: Int,
-        gameStatus: GameConstants.GameStatus
+        toGame: Game
     ): Game {
-        if (gameStatus == GameConstants.GameStatus.NEW_GAME ||
-            gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_GAMER ||
-            gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT ||
-            gameStatus == GameConstants.GameStatus.NEW_GAME_ACCEPT
+        if (
+            toGame.gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_GAMER ||
+            toGame.gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT
         ) {
-            if (gameStatus == GameConstants.GameStatus.NEW_GAME_ACCEPT) {
-                val opponentGame = rg.getGameOpponentRemote(currentGamer)
-                if (opponentGame != null) {
-                    initGame(
-                        gameStatusOld = opponentGame.gameStatus,
-                        gameStatusNew = GameConstants.GameStatus.GAME_IS_ON,
-                        previousGameStatus = currentGame.gameStatus,
-                        gameFieldSizeNew = opponentGame.gameFieldSize
-                    )
-                    countTurnOpponent = opponentGame.countOfTurn
-                } else currentGame.gameStatus = GameConstants.GameStatus.ABORTED_GAME
-
-            } else {
+            if (toGame.turnOfGamer) {
                 initGame(
-                    gameStatusOld = gameStatus,
-                    gameStatusNew = gameStatus,
-                    previousGameStatus = currentGame.gameStatus,
+                    gameStatusOld = toGame.gameStatus,
+                    gameStatusNew = toGame.gameStatus,
                     gameFieldSizeNew = currentGamer.gameFieldSize
                 )
                 countTurnGamer = 1
@@ -164,53 +94,65 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
                         currentGamer,
                         currentGame
                     )
-                )
-                    currentGame.gameStatus = GameConstants.GameStatus.GAME_IS_ON
+                ) currentGame.gameStatus = GameConstants.GameStatus.GAME_IS_ON
                 else currentGame.gameStatus = GameConstants.GameStatus.ABORTED_GAME
+            } else {
+                initGame(
+                    gameStatusOld = toGame.gameStatus,
+                    gameStatusNew = GameConstants.GameStatus.GAME_IS_ON,
+                    gameFieldSizeNew = toGame.gameFieldSize
+                )
+                countTurnOpponent = toGame.countOfTurn
             }
+
             return currentGame
         }
 
-        if ((gameStatus == GameConstants.GameStatus.GAME_IS_ON &&
-                    currentGame.gameStatus !in arrayOf(
+        if ((toGame.gameStatus == GameConstants.GameStatus.GAME_IS_ON &&
+                    toGame.gameStatus !in arrayOf(
                 GameConstants.GameStatus.WIN_GAMER,
                 GameConstants.GameStatus.DRAWN_GAME,
                 GameConstants.GameStatus.WIN_OPPONENT,
                 GameConstants.GameStatus.ABORTED_GAME
             ))
             ||
-            gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT ||
-            (gameStatus == GameConstants.GameStatus.NEW_GAME && !currentGame.turnOfGamer)
+            toGame.gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT
         ) {
             currentGame.gameStatus = GameConstants.GameStatus.GAME_IS_ON
 
-            if (currentGame.turnOfGamer) {
-                if (!checkHumanTurn(motionXIndex, motionYIndex, true)) return currentGame
+            if (toGame.turnOfGamer) {
+                if (!checkHumanTurn(
+                        toGame.motionXIndex,
+                        toGame.motionYIndex,
+                        true
+                    )
+                ) return currentGame
                 currentGame.countOfTurn = ++countTurnGamer
                 if (rg.setGameOpponentRemote(currentGamer, currentGame))
                     when {
-                        ai.checkWin(motionXIndex, motionYIndex, currentGame.turnOfGamer) ->
+                        ai.checkWin(
+                            toGame.motionXIndex,
+                            toGame.motionYIndex,
+                            currentGame.turnOfGamer
+                        ) ->
                             currentGame.gameStatus = GameConstants.GameStatus.WIN_GAMER
                         ai.isMapFull() ->
                             currentGame.gameStatus = GameConstants.GameStatus.DRAWN_GAME
                     } else currentGame.gameStatus = GameConstants.GameStatus.ABORTED_GAME
             } else {
-                val opponentGame = rg.getGameOpponentRemote(currentGamer)
                 var goodOpponentTurn = false
-                if (opponentGame != null) {
-                    if (opponentGame.countOfTurn > countTurnOpponent) {
-                        countTurnOpponent = opponentGame.countOfTurn
-                        if (checkHumanTurn(
-                                opponentGame.motionXIndex,
-                                opponentGame.motionYIndex,
-                                false
-                            )
-                        ) {
-                            currentGame.gameStatus = opponentGame.gameStatus
-                            goodOpponentTurn = true
-                        }
+                if (toGame.countOfTurn > countTurnOpponent) {
+                    countTurnOpponent = toGame.countOfTurn
+                    if (checkHumanTurn(
+                            toGame.motionXIndex,
+                            toGame.motionYIndex,
+                            false
+                        )
+                    ) {
+                        currentGame.gameStatus = toGame.gameStatus
+                        goodOpponentTurn = true
                     }
-                } else currentGame.gameStatus = GameConstants.GameStatus.ABORTED_GAME
+                }
                 if (!goodOpponentTurn) {
                     currentGame.motionXIndex = -1
                     currentGame.motionYIndex = -1
@@ -239,14 +181,13 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
         motionYIndex: Int,
         gameStatus: GameConstants.GameStatus
     ): Game {
-        if (gameStatus == GameConstants.GameStatus.NEW_GAME ||
+        if (
             gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_GAMER ||
             gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT
         ) {
             initGame(
                 gameStatusOld = gameStatus,
                 gameStatusNew = GameConstants.GameStatus.GAME_IS_ON,
-                previousGameStatus = currentGame.gameStatus,
                 gameFieldSizeNew = currentGamer.gameFieldSize
             )
             currentGamer.gameFieldSize = currentGame.gameFieldSize
@@ -261,8 +202,7 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
                 GameConstants.GameStatus.ABORTED_GAME
             ))
             ||
-            gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT ||
-            (gameStatus == GameConstants.GameStatus.NEW_GAME && !currentGame.turnOfGamer)
+            gameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_OPPONENT
         ) {
             currentGame.gameStatus = GameConstants.GameStatus.GAME_IS_ON
 
@@ -310,7 +250,6 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
     private fun initGame(
         gameStatusOld: GameConstants.GameStatus,
         gameStatusNew: GameConstants.GameStatus,
-        previousGameStatus: GameConstants.GameStatus,
         gameFieldSizeNew: Int
     ) {
 
@@ -329,8 +268,6 @@ class GameRepositoryImpl(val remoteOpponentGame: Boolean = false, db: CrossZeroD
 
         currentGame.turnOfGamer = when (gameStatusOld) {
             GameConstants.GameStatus.NEW_GAME_FIRST_GAMER -> true
-            GameConstants.GameStatus.NEW_GAME -> previousGameStatus == GameConstants.GameStatus.WIN_OPPONENT ||
-                    previousGameStatus == GameConstants.GameStatus.NEW_GAME_FIRST_GAMER
             else -> false
         }
     }

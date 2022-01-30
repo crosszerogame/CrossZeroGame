@@ -76,7 +76,7 @@ class RemoteGame(private val db: CrossZeroDB) {
         g?.let {
             o?.let {
                 if (o.isOnLine && o.keyOpponent == g.keyGamer) {
-                    ok = db.updGame(o.keyGame, game)
+                    ok = db.updGame(o!!.keyGame, game)
                 } else {
                     g.keyOpponent = ""
                     db.updGamer(g.keyGamer, g)
@@ -104,4 +104,7 @@ class RemoteGame(private val db: CrossZeroDB) {
         }
         return gm
     }
+
+    suspend fun gamerLiveQueryRemote(key: String)=db.gamerLiveQuery(key)
+    suspend fun gameLiveQueryRemote(key: String)=db.gameLiveQuery(key)
 }

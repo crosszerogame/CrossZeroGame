@@ -36,10 +36,8 @@ object GameConstants {
         WIN_OPPONENT,
         DRAWN_GAME,
         ABORTED_GAME,
-        NEW_GAME,
         NEW_GAME_FIRST_GAMER,
-        NEW_GAME_FIRST_OPPONENT,
-        NEW_GAME_ACCEPT
+        NEW_GAME_FIRST_OPPONENT
     }
 
     enum class GameLevel {

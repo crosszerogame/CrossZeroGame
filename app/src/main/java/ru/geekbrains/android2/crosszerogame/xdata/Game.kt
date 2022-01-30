@@ -24,7 +24,7 @@ data class Game(
     },
     var motionXIndex: Int = -1,
     var motionYIndex: Int = -1,
-    var gameStatus: GameConstants.GameStatus = GameConstants.GameStatus.NEW_GAME,
+    var gameStatus: GameConstants.GameStatus = GameConstants.GameStatus.NEW_GAME_FIRST_GAMER,
     var dotsToWin: Int = DOTS_TO_WIN1_SIZE1,
     var turnOfGamer: Boolean = true,
     var timeForTurn: Int = MIN_TIME_FOR_TURN,

@@ -14,6 +14,7 @@
         <!-- Customize your theme here. -->
         <item name="actionBarStyle">@style/Widget.MaterialComponents.ActionBar.Primary</item>
         <item name="translucent_bg">@color/translucent_black</item>
+        <item name="field_bg">@drawable/dark_field_bg</item>
         <item name="materialButtonStyle">@style/ButtonStyle</item>
         <item name="android:textViewStyle">@style/TextViewStyle</item>
         <item name="snackbarButtonStyle">@style/SnackbarStyle</item>

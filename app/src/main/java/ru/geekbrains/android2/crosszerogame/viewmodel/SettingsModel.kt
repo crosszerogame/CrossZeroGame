@@ -61,17 +61,9 @@ class SettingsModel : ViewModel() {
 
     private suspend fun initGamer(): Gamer {
         var gamer = settings.getGamer()
-        if (gamer.isOnLine)
-            gamer = gr.gamer(
-                gamer
-            ) else {
-            gamer = gr.gamer(
-                gamer
-            )
-            gamer = grAi.gamer(
-                gamer
-            )
-        }
+        gamer = gr.gamer(gamer)
+        if (!gamer.isOnLine)
+            gamer = grAi.gamer(gamer)
         settings.setGamer(gamer)
         return gamer
     }

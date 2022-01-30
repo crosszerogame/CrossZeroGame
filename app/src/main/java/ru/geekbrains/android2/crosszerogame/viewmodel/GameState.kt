@@ -8,7 +8,7 @@ sealed class GameState {
         val fieldSize: Int,
         val nikOpponent: String = "",
         val levelOpponent: GameConstants.GameLevel = GameConstants.DEFAULT_LEVEL_GAMER,
-        val opponentIsFirst: Boolean
+        val gamerIsFirst: Boolean
     ) : GameState()
 
     data class MoveGamer(val x: Int, val y: Int, val isCross: Boolean = true) : GameState()

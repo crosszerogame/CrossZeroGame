@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.geekbrains.android2.crosszerogame.R
 import ru.geekbrains.android2.crosszerogame.utils.addAction
-import ru.geekbrains.android2.crosszerogame.view.list.CellValue
 import ru.geekbrains.android2.crosszerogame.view.list.FieldAdapter
 import ru.geekbrains.android2.crosszerogame.view.list.Linear
 import ru.geekbrains.android2.crosszerogame.viewmodel.GameModel
@@ -29,6 +28,7 @@ class GameFragment : Fragment(), BackEvent {
 
     private var messageBar: Snackbar? = null
     var onMessageAction: (() -> Unit)? = null
+    var onHideBottom: (() -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,9 +62,10 @@ class GameFragment : Fragment(), BackEvent {
                     cancel()
                 }
             }
+
             override fun onFinish() {
                 resizeField(model.fieldSize)
-  //              restoreField()
+                //              restoreField()
                 model.readyField()
                 rvField.visibility = View.VISIBLE
             }
@@ -92,6 +93,7 @@ class GameFragment : Fragment(), BackEvent {
             cellSize = countCellSize(linear, fieldSize),
             linear = linear
         ) { x, y ->
+            onHideBottom?.invoke()
             model.doMove(x, y)
         }
         rvField.adapter = adapter
@@ -141,15 +143,16 @@ class GameFragment : Fragment(), BackEvent {
                 doMove(state.x, state.y, state.isCross)
             }
             is GameState.NewGame -> {
-                if (state.remoteOpponent) {
-                    showMessageNewGame(opponentStr(state))
-                } else initField()
+                initField()
+//                if (state.remoteOpponent) {
+//                    showMessageNewGame(opponentStr(state))
+//                } else initField()
             }
-            GameState.WinGamer -> showMessage(R.string.win_player)
-            GameState.WinOpponent -> showMessage(R.string.win_opponent)
-            GameState.DrawnGame -> showMessage(R.string.drawn)
-            GameState.AbortedGame -> showMessage(R.string.aborted_game)
-            GameState.WaitOpponent -> showMessage(R.string.wait_opponent, false)
+            is GameState.WinGamer -> showMessage(R.string.win_player)
+            is GameState.WinOpponent -> showMessage(R.string.win_opponent)
+            is GameState.DrawnGame -> showMessage(R.string.drawn)
+            is GameState.AbortedGame -> showMessage(R.string.aborted_game)
+            is GameState.WaitOpponent -> showMessage(R.string.wait_opponent, false)
         }
     }
 
@@ -168,14 +171,14 @@ class GameFragment : Fragment(), BackEvent {
 
     private fun showMessageNewGame(stringMsg: String) {
         messageBar = Snackbar.make(rvField, stringMsg, Snackbar.LENGTH_INDEFINITE)
-            messageBar?.setAction(android.R.string.ok) {
-                initField()
-                dismissMessage()
+        messageBar?.setAction(android.R.string.ok) {
+            initField()
+            dismissMessage()
 
-            }?.addAction(R.layout.snackbar_extra_button, R.string.no) {
-                model.abortGame()
-                dismissMessage()
-            }
+        }?.addAction(R.layout.snackbar_extra_button, R.string.no) {
+            model.abortGame()
+            dismissMessage()
+        }
         messageBar?.show()
     }
 
@@ -183,7 +186,7 @@ class GameFragment : Fragment(), BackEvent {
         String.format(
             Locale.getDefault(), getString(R.string.opponent_info),
             state.nikOpponent,
-            if (state.opponentIsFirst) getString(R.string.cross) else getString(R.string.zero),
+            if (state.gamerIsFirst) getString(R.string.zero) else getString(R.string.cross),
             state.fieldSize,
             state.fieldSize,
             state.levelOpponent

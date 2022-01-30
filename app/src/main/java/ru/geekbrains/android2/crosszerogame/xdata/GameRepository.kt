@@ -9,15 +9,13 @@ interface GameRepository {
 
     suspend fun setOpponent(
         key: String,
-        gameStatus: GameConstants.GameStatus = GameConstants.GameStatus.NEW_GAME
+        gameStatus: GameConstants.GameStatus = GameConstants.GameStatus.NEW_GAME_FIRST_GAMER
     ): Game?
 
     suspend fun opponentsList(): List<Gamer>
 
     suspend fun game(
-        motionXIndex: Int = -1,
-        motionYIndex: Int = -1,
-        gameStatus: GameConstants.GameStatus = GameConstants.GameStatus.NEW_GAME
+        toGame:Game
     ): Game
 
     suspend fun deleteGamer(): Boolean

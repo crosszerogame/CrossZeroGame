@@ -16,8 +16,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var bottomSheet: BottomSheetBehavior<FrameLayout>
-    private val showSettings = {
+    private val showBottom = {
         bottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+    private val hideBottom = {
+        bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,14 +31,17 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             val fragmentTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
             val gameFragment = GameFragment()
-            gameFragment.onMessageAction = showSettings
+            gameFragment.onMessageAction = showBottom
+            gameFragment.onHideBottom = hideBottom
             fragmentTransaction.replace(R.id.container, gameFragment, TAG_GAME)
                 .replace(R.id.bottom_container, SettingsFragment()).commit()
         } else {
             bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
             supportFragmentManager.findFragmentByTag(TAG_GAME)?.let {
-                if (it is GameFragment)
-                    it.onMessageAction = showSettings
+                if (it is GameFragment) {
+                    it.onMessageAction = showBottom
+                    it.onHideBottom = hideBottom
+                }
             }
         }
     }
@@ -49,9 +55,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (bottomSheet.state == BottomSheetBehavior.STATE_HIDDEN)
-            bottomSheet.state = BottomSheetBehavior.STATE_EXPANDED
+            showBottom.invoke()
         else
-            bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+            hideBottom.invoke()
 
         return super.onOptionsItemSelected(item)
     }
@@ -64,6 +70,6 @@ class MainActivity : AppCompatActivity() {
         if (bottomSheet.state == BottomSheetBehavior.STATE_HIDDEN)
             super.onBackPressed()
         else
-            bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
+            hideBottom.invoke()
     }
 }
