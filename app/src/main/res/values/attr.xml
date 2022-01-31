@@ -2,4 +2,5 @@
 <resources>
     <attr name="text_color" format="color" />
     <attr name="translucent_bg" format="color" />
+    <attr name="field_bg" format="reference" />
 </resources>

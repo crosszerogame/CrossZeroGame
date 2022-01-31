@@ -1,14 +1,36 @@
 <resources>
     <string name="app_name">Крестики-Нолики</string>
+    <string name="back4app_server_url">https://crosszerogame.b4a.io/</string>
+    <!-- Paste BOTH strings as required -->
+    <string name="back4app_app_id">DyvQhXIpji0ISZvi6S1lkEukNBWfC0ToMDMSqcWt</string>
+    <string name="back4app_client_key">2n6DEc2KR8dZv6sFEPkK5r6NpTyOeDh8yoS42T8m</string>
     <string name="begin_as">Начинать</string>
     <string name="first">первым</string>
     <string name="second">вторым</string>
     <string name="field_size">Размер поля %d на %d, для победы: %d</string>
-    <string name="start">Начать</string>
+    <string name="start">Играть</string>
     <string name="settings">Настройки</string>
-    <string name="drawn">Ничья</string>
-    <string name="win_player">Вы победили!</string>
-    <string name="win_opponent">Победил противник</string>
+    <string name="drawn">Ничья. Сыграем еще?</string>
+    <string name="win_player">Вы победили! Сыграем еще?</string>
+    <string name="win_opponent">Победил противник. Сыграем еще?</string>
     <string name="aborted_game">Игра прервана</string>
     <string name="wait_opponent">Ожидание хода противника</string>
+    <string name="single_game">Настройки</string>
+    <string name="create_remote">Создать сетевую</string>
+    <string name="connect">Противники</string>
+    <string name="nick">Никнейм</string>
+    <string name="create">Создать</string>
+    <string name="error">Ошибка:&#160;</string>
+    <string name="game_level">Уровень игры: %d</string>
+    <string name="unavailable_nick">Недоступный ник</string>
+    <string name="wait_cross">Ожидается игрок за Крестики</string>
+    <string name="wait_zero">Ожидается игрок за Нолики</string>
+    <string name="opponent_info">%s за %s, %dx%d, уровень %d</string>
+    <string name="no">X</string>
+    <string name="cross">X</string>
+    <string name="zero">O</string>
+    <string name="ai">робот</string>
+    <string name="human">человек</string>
+    <string name="opponent">Противник</string>
+    <string name="remote_game_tip">Выберите себе протитвника или дождитесь пока выберут вас</string>
 </resources>
